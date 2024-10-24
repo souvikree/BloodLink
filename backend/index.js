@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000; // You can configure the port in your .env file
+const PORT = process.env.PORT || 5000; 
 
 const server = http.createServer(app);
 
