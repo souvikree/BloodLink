@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
-const Patient = require('../models/Patient');
 const BloodBank = require('../models/BloodBank');
 const Donor = require('../models/Donor');
 const DeliveryPersonnel = require('../models/Delivery');
 const Admin = require('../models/Admin');
+const User = require('../models/User');
 
 
 const protect = asyncHandler(async (req, res, next) => {
@@ -20,8 +20,8 @@ const protect = asyncHandler(async (req, res, next) => {
             let user;
 
             switch (role) {
-                case 'patient':
-                    user = await Patient.findById(decoded.id).select('-password');
+                case 'user':
+                    user = await User.findById(decoded.id).select('-password');
                     break;
                 case 'bloodBank':
                     user = await BloodBank.findById(decoded.id).select('-password');
@@ -71,12 +71,12 @@ const admin = asyncHandler(async (req, res, next) => {
 });
 
 // Role-based middleware for patients
-const patient = asyncHandler(async (req, res, next) => {
-    if (req.user && req.user instanceof Patient) {
+const user = asyncHandler(async (req, res, next) => {
+    if (req.user && req.user instanceof User) {
         next();
     } else {
         res.status(403);
-        throw new Error('Patient access only');
+        throw new Error('User access only');
     }
 });
 
@@ -113,7 +113,7 @@ const deliveryPersonnel = asyncHandler(async (req, res, next) => {
 module.exports = {
     protect,
     admin,
-    patient,
+    user,
     bloodBank,
     donor,
     deliveryPersonnel,

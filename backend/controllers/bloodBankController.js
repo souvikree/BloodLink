@@ -1,13 +1,10 @@
 const BloodBank = require('../models/BloodBank');
 const asyncHandler = require('express-async-handler');
 
-
-
 const getAllBloodBanks = asyncHandler(async (req, res) => {
     const bloodBanks = await BloodBank.find();
     res.json(bloodBanks);
 });
-
 
 const getBloodBankById = asyncHandler(async (req, res) => {
     const bloodBank = await BloodBank.findById(req.params.id);
@@ -17,7 +14,6 @@ const getBloodBankById = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Blood bank not found' });
     }
 });
-
 
 const updateBloodBank = asyncHandler(async (req, res) => {
     const bloodBank = await BloodBank.findById(req.params.id);
@@ -33,7 +29,6 @@ const updateBloodBank = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Blood bank not found' });
     }
 });
-
 
 const deleteBloodBank = asyncHandler(async (req, res) => {
     const bloodBank = await BloodBank.findById(req.params.id);

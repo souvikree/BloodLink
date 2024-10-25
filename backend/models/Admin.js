@@ -16,20 +16,21 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    role: {
-        type: String,
-        enum: ['superadmin', 'admin'],
-        default: 'admin',
-    },
+    // role: {
+    //     type: String,
+    //     enum: ['superadmin', 'admin'],
+    //     default: 'admin',
+    // },
 }, {
     timestamps: true
 });
 
 // Password hashing before saving
-adminSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
+// adminSchema.pre('save', async function (next) {
+//     if (!this.isModified('password')) return next();
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+// });
 
 module.exports = mongoose.model('Admin', adminSchema);

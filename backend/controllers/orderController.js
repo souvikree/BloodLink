@@ -8,7 +8,6 @@ const getAllOrders = asyncHandler(async (req, res) => {
     res.json(orders);
 });
 
-
 const getOrderById = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id).populate('user').populate('bloodBank').populate('delivery');
     if (order) {
@@ -18,14 +17,12 @@ const getOrderById = asyncHandler(async (req, res) => {
     }
 });
 
-
 const createOrder = asyncHandler(async (req, res) => {
     const { user, bloodBank, bloodType, quantity, status } = req.body;
     const order = new Order({ user, bloodBank, bloodType, quantity, status });
     const newOrder = await order.save();
     res.status(201).json(newOrder);
 });
-
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
@@ -40,7 +37,6 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Order not found' });
     }
 });
-
 
 const deleteOrder = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
