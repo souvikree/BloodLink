@@ -15,6 +15,10 @@ const deliverySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    password: { 
+        type: String,
+        required: true, 
+    },
     orders: [
         {
             type: mongoose.Schema.Types.ObjectId,

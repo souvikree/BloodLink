@@ -2,12 +2,10 @@
 const Admin = require('../models/Admin');
 const asyncHandler = require('express-async-handler');
 
-
 const getAllAdmins = asyncHandler(async (req, res) => {
     const admins = await Admin.find();
     res.json(admins);
 });
-
 
 const getAdminById = asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
@@ -17,7 +15,6 @@ const getAdminById = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Admin not found' });
     }
 });
-
 
 const updateAdminRole = asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
@@ -29,7 +26,6 @@ const updateAdminRole = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Admin not found' });
     }
 });
-
 
 const deleteAdmin = asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
