@@ -2,9 +2,8 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    patient: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Patient',
         required: true,
     },
     bloodBank: {
