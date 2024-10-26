@@ -1,121 +1,126 @@
 import React from "react";
+import "@fontsource/poppins"; 
+import "@fontsource/roboto";  
 
 const services = [
   { 
     title: "Find Blood Faster, Save Lives", 
     description: "Instantly check real-time blood availability and nearby blood banks, ensuring efficient searches during emergencies.",
     bgColor: "#F9F2E7",
-    size: "large" 
-  },
-  { 
-    title: "Filter & Find the Right Blood Match", 
-    description: "Quickly locate the required blood type with advanced filters by type and RH factor.", 
-    bgColor: "#E7F2F9",
-    size: "medium" 
-  },
-  { 
-    title: "Locate Help Nearby", 
-    description: "View the nearest blood banks and donors within a 7 km radius, enabling faster access to blood sources.",
-    bgColor: "#F2E7F9",
-    size: "small"
-  },
-  { 
-    title: "Order Blood & Track Every Step", 
-    description: "Track your blood order from request to delivery, receiving status updates along the way.",
-    bgColor: "#E7F9F2",
-    size: "wide"
+    colSpan: "col-span-12 md:col-span-8",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image1.jpg" 
   },
   { 
     title: "Manage Donations & Supplies Seamlessly", 
     description: "Blood banks and donors get dedicated dashboards to manage supplies and respond to requests effectively.",
     bgColor: "#F9E7F2",
-    size: "medium"
+    colSpan: "col-span-6 md:col-span-4",
+    rowSpan: "row-span-2",
+    imgSrc: "/path/to/image5.jpg"
+  },
+  { 
+    title: "Locate Help Nearby", 
+    description: "View the nearest blood banks and donors within a 7 km radius, enabling faster access to blood sources.",
+    bgColor: "#F2E7F9",
+    colSpan: "col-span-6 md:col-span-4",
+    rowSpan: "row-span-2",
+    imgSrc: "/path/to/image3.jpg"
+  },
+  
+  { 
+    title: "Your Health, Protected", 
+    description: "BloodLink keeps patient data secure with high-level encryption, ensuring privacy and trust.",
+    bgColor: "#E7F9E9",
+    colSpan: "col-span-6 md:col-span-4",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image9.jpg"
+  },
+  
+  { 
+    title: "Filter & Find the Right Blood Match", 
+    description: "Quickly locate the required blood type with advanced filters by type and RH factor.", 
+    bgColor: "#E7F2F9",
+    colSpan: "col-span-6 md:col-span-8",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image2.jpg"
+  },
+  
+  { 
+    title: "Order Blood & Track Every Step", 
+    description: "Track your blood order from request to delivery, receiving status updates along the way.",
+    bgColor: "#E7F9F2",
+    colSpan: "col-span-12 md:col-span-8",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image4.jpg"
   },
   { 
     title: "Fast, Reliable Blood Delivery", 
     description: "BloodLink's admin-coordinated delivery ensures timely, secure blood transport by dedicated personnel.",
     bgColor: "#F2F9E7",
-    size: "medium"
+    colSpan: "col-span-6 md:col-span-4",
+    rowSpan: "row-span-2",
+    imgSrc: "/path/to/image6.jpg"
   },
+  
   { 
     title: "Empowering Donors to Save Lives", 
     description: "Donors can manage availability, respond to requests, and help patients in need directly from their app.",
     bgColor: "#E7E7F9",
-    size: "tall"
+    colSpan: "col-span-12 md:col-span-6",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image7.jpg"
   },
   { 
     title: "Join a Life-Saving Community", 
-    description: "Patients, donors, and blood banks enjoy a seamless registration and onboarding experience.",
+    description: "",
     bgColor: "#F2E7E7",
-    size: "small"
+    colSpan: "col-span-6 md:col-span-2",
+    rowSpan: "row-span-1",
+    imgSrc: "/path/to/image8.jpg"
   },
-  { 
-    title: "Your Health, Protected", 
-    description: "BloodLink keeps patient data secure with high-level encryption, ensuring privacy and trust.",
-    bgColor: "#E7F9E9",
-    size: "medium"
-  }
+  
 ];
 
 export default function ServicesPage() {
-    return (
-      <div className="min-h-screen bg-[#F4F4ED]">
-        <div className="container mx-auto px-10 md:px-20 py-12 md:py-20">
-          <h2 className="text-4xl font-bold text-center mb-10 text-gray-900">Our Services</h2>
-          
-          <div className="grid grid-cols-12 gap-6 justify-items-center">
-            {/* First Row */}
-            <ServiceCard service={services[0]} className="col-start-1" />
-            <ServiceCard service={services[1]} className="col-start-5" />
-            <ServiceCard service={services[2]} className="col-start-8" />
-  
-            {/* Second Row */}
-            <ServiceCard service={services[3]} className="col-start-1" />
-            <ServiceCard service={services[4]} className="col-start-7" />
-  
-            {/* Third Row */}
-            <ServiceCard service={services[5]} className="col-start-1" />
-            <ServiceCard service={services[6]} className="col-start-4" />
-            <ServiceCard service={services[7]} className="col-start-7" />
-            <ServiceCard service={services[8]} className="col-start-9" />
-          </div>
+  return (
+    <div className="min-h-screen bg-[#FBFBF9]">
+      <div className="container mx-auto px-4 md:px-12 py-12 md:py-20">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 text-[#333333]" style={{ fontFamily: "Poppins, sans-serif" }}>
+          Our Services
+        </h2>
+        
+        <div className="grid grid-cols-12 gap-6 auto-rows-[200px] md:auto-rows-[300px]">
+          {services.map((service, index) => (
+            <ServiceCard key={index} service={service} />
+          ))}
         </div>
       </div>
-    );
-  }
-  
-  const ServiceCard = ({ service, className = "" }) => {
-    const sizeClassMap = {
-      small: "col-span-3 md:col-span-2 min-h-[200px]",
-      medium: "col-span-4 md:col-span-3 min-h-[200px]",
-      large: "col-span-6 md:col-span-4 min-h-[300px]",
-      wide: "col-span-8 md:col-span-6 min-h-[200px]",
-      tall: "col-span-4 md:col-span-3 min-h-[300px]"
-    };
-  
-    return (
-      <div 
-        className={`
-          ${sizeClassMap[service.size]}
-          ${className}
-          p-4 rounded-2xl shadow-lg 
-          transition-all duration-300
-          hover:shadow-xl hover:-translate-y-1
-          overflow-hidden
-        `}
-        style={{ 
-          backgroundColor: service.bgColor,
-        }}
-      >
-        <div className="h-full flex flex-col justify-between">
-          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-            {service.title}
-          </h3>
-          <p className="text-gray-600 text-base leading-relaxed line-clamp-3">
-            {service.description}
-          </p>
-        </div>
-      </div>
-    );
-  };
-  
+    </div>
+  );
+}
+
+const ServiceCard = ({ service }) => (
+  <div 
+    className={`
+      ${service.colSpan} ${service.rowSpan}
+      p-5 rounded-2xl shadow-md transition-all duration-300
+      hover:shadow-xl hover:-translate-y-1 transform
+    `}
+    style={{ backgroundColor: service.bgColor }}
+  >
+    <img 
+      src={service.imgSrc} 
+      alt={service.title} 
+      className="w-full h-3/4 rounded-t-2xl object-cover"
+    />
+    <div className="h-1/4 flex flex-col justify-center text-center py-3">
+      <h3 className="text-lg md:text-xl font-semibold text-[#222222] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>
+        {service.title}
+      </h3>
+      <p className="text-gray-600 text-sm md:text-base leading-relaxed" style={{ fontFamily: "Roboto, sans-serif" }}>
+        {service.description}
+      </p>
+    </div>
+  </div>
+);
