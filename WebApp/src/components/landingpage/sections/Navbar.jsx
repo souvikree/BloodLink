@@ -10,7 +10,7 @@ export default function Navbar() {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <div className="flex items-center">
+                    <div className="flex items-center pl-8">
                         <a href="/" className="text-2xl font-bold text-red-600">
                             BloodLink
                         </a>
@@ -44,6 +44,9 @@ export default function Navbar() {
                         </a>
                         <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                             Sign Up
+                        </button>
+                        <button className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 transition">
+                            Log In
                         </button>
                     </div>
 
@@ -88,6 +91,9 @@ export default function Navbar() {
                             </a>
                             <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition w-full">
                                 Sign Up
+                            </button>
+                            <button className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 transition w-full">
+                                Log In
                             </button>
                         </div>
                     </div>
