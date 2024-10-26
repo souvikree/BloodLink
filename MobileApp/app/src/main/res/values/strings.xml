@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">BLoodLinkApplication</string>
+    <string name="bloodlink">BloodLink</string>
+    <string name="notification_button_main_screen">Notification Button Main Screen</string>
+    <string name="here_villbe_list_of_image">Here villbe List of Image</string>
+    <string name="services">Services</string>
+    <string name="bloodsearchicon">BloodSearchIcon</string>
+    <string name="find_donor">Find Donor</string>
 </resources>
