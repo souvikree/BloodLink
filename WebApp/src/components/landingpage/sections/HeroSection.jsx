@@ -3,7 +3,7 @@ import Image from 'next/image';
 export default function HeroSection() {
   return (
     <div className="bg-[#F4F4ED] min-h-screen">
-      <main className="container mx-auto px-4 py-16 md:py-24">
+      <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="flex flex-col md:flex-row items-center justify-between">
           {/* Text Content */}
           <div className="md:w-1/2 md:pr-8 mb-8 md:mb-0">
@@ -29,14 +29,14 @@ export default function HeroSection() {
               <Image
                 src="/hero.png"
                 alt="Blood Donation Illustration"
-                fill
+                layout='fill'
                 objectFit="cover"
                 className="rounded-3xl shadow-lg w-12 h-12"
               />
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
