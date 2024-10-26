@@ -3,8 +3,17 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const { errorHandler, notFound } = require('./middleware/errorHandler'); // Adjust path as needed
 
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const bloodBankRoutes = require('./routes/bloodBankRoutes');
+const donorRoutes = require('./routes/donorRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
+// Connect to the database
 require('./config/db'); 
 
 const app = express();
@@ -15,13 +24,23 @@ app.use(helmet());
 app.use(morgan('dev')); 
 app.use(bodyParser.json()); 
 
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/blood-banks', bloodBankRoutes);
+app.use('/api/donors', donorRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/admins', adminRoutes);
+
+// Health check route
 app.get('/', (req, res) => {
     res.status(200).json({ message: "BloodLink Backend API is running!" });
 });
 
 // Handle 404 errors
-app.use((req, res) => {
-    res.status(404).json({ message: "Route not found" });
-});
+app.use(notFound);
+
+// Error handling middleware
+app.use(errorHandler);
 
 module.exports = app;

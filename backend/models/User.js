@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const patientSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -16,10 +16,6 @@ const patientSchema = new mongoose.Schema({
         required: true,
     },
     phone: {
-        type: String,
-        required: true,
-    },
-    bloodType: {
         type: String,
         required: true,
     },
@@ -41,15 +37,16 @@ const patientSchema = new mongoose.Schema({
 });
 
 // Password hashing before saving
-patientSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
+// userSchema.pre('save', async function (next) {
+//     if (!this.isModified('password')) return next();
+//     const salt = await bcrypt.genSalt(10);
+//     this.password = await bcrypt.hash(this.password, salt);
+//     next();
+// });
 
-// Check password method
-patientSchema.methods.checkPassword = function (candidatePassword, patientPassword) {
-    return bcrypt.compare(candidatePassword, patientPassword);
+// Method to compare passwords
+userSchema.methods.checkPassword = function (candidatePassword, userPassword) {
+    return bcrypt.compare(candidatePassword, userPassword);
 };
 
-module.exports = mongoose.model('Patient', patientSchema);
+module.exports = mongoose.model('User', userSchema);
