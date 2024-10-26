@@ -9,7 +9,7 @@ export default function WhatIsBloodLink() {
 
                 {/* Top Horizontal Section for Hospitals */}
                 <div
-                    className="relative bg-[#F4F4ED] p-6  rounded-lg mb-8 flex flex-col items-center text-center md:flex-row md:text-left shadow-lg transition-transform duration-300 hover:scale-105"
+                    className="relative bg-[#F4F4ED] p-6  rounded-lg mb-8 flex flex-col items-center text-center md:flex-row md:text-left shadow-lg "
                     style={{
                         backgroundImage: "url('/hospital1.jpg')",
                         backgroundSize: "cover",
@@ -33,7 +33,7 @@ export default function WhatIsBloodLink() {
                 <div className="grid md:grid-cols-2 gap-8">
                     {/* Donors */}
                     <div
-                        className="relative flex flex-col items-center justify-center h-full bg-[#F4F4ED] p-6 rounded-lg text-center shadow-lg transition-transform duration-300 hover:scale-105"
+                        className="relative flex flex-col items-center justify-center h-full bg-[#F4F4ED] p-6 rounded-lg text-center shadow-lg "
                         style={{
                             backgroundImage: "url('/donar1.jpg')",
                             backgroundSize: "cover",
@@ -53,7 +53,7 @@ export default function WhatIsBloodLink() {
                     </div>
 
                     {/* Patients */}
-                    <div className="relative flex flex-col items-center justify-center h-full bg-[#F4F4ED] p-6 rounded-lg text-center shadow-lg transition-transform duration-300 hover:scale-105"
+                    <div className="relative flex flex-col items-center justify-center h-full bg-[#F4F4ED] p-6 rounded-lg text-center shadow-lg "
                         style={{
                             backgroundImage: "url('/patient1.jpg')",
                             backgroundSize: "cover",

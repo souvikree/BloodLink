@@ -105,7 +105,7 @@ const ServiceCard = ({ service }) => (
     className={`
       ${service.colSpan} ${service.rowSpan}
       p-5 rounded-2xl shadow-md transition-all duration-300
-      hover:shadow-xl hover:-translate-y-1 transform
+      hover:shadow-xl     
     `}
     style={{ backgroundColor: service.bgColor }}
   >
