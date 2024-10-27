@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
+import Link from "next/link";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,9 +43,11 @@ export default function Navbar() {
                         >
                             Contact
                         </a>
-                        <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                        <Link href="/signup" className="text-gray-600 hover:text-red-600 transition">
+                            <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                             Sign Up
                         </button>
+                        </Link>
                         {/* <button className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 transition">
                             Log In
                         </button> */}
