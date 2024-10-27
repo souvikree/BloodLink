@@ -7,7 +7,7 @@ export default function Footer() {
             <div className="container mx-auto px-6 md:px-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
                     {/* Left Section */}
-                    <div className="mb-8 md:mb-0">
+                    <div className="mb-8 md:mb-0 md:w-1/3">
                         <h3 className="text-2xl font-semibold mb-6">Need Help?</h3>
                         <p className="text-gray-400 mb-6">
                             If you have further questions or need any assistance, please get in touch with our team, and we will gladly assist you.
