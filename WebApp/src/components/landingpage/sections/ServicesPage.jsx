@@ -1,6 +1,6 @@
 import React from "react";
-import "@fontsource/poppins"; 
-import "@fontsource/roboto";  
+// import "@fontsource/poppins"; 
+// import "@fontsource/roboto";  
 
 const services = [
   { 
@@ -9,7 +9,7 @@ const services = [
     bgColor: "#F9F2E7",
     colSpan: "col-span-12 md:col-span-8",
     rowSpan: "row-span-1",
-    imgSrc: "/path/to/image1.jpg" 
+    imgSrc: "\image1.png" 
   },
   { 
     title: "Manage Donations & Supplies Seamlessly", 
@@ -17,7 +17,7 @@ const services = [
     bgColor: "#F9E7F2",
     colSpan: "col-span-6 md:col-span-4",
     rowSpan: "row-span-2",
-    imgSrc: "/path/to/image5.jpg"
+    imgSrc: "\image5.1.svg"
   },
   { 
     title: "Locate Help Nearby", 
@@ -25,7 +25,7 @@ const services = [
     bgColor: "#F2E7F9",
     colSpan: "col-span-6 md:col-span-4",
     rowSpan: "row-span-2",
-    imgSrc: "/path/to/image3.jpg"
+    imgSrc: "\image3.png"
   },
   
   { 
@@ -34,7 +34,7 @@ const services = [
     bgColor: "#E7F9E9",
     colSpan: "col-span-6 md:col-span-4",
     rowSpan: "row-span-1",
-    imgSrc: "/path/to/image9.jpg"
+    imgSrc: "\image9.png"
   },
   
   { 
@@ -43,7 +43,7 @@ const services = [
     bgColor: "#E7F2F9",
     colSpan: "col-span-6 md:col-span-8",
     rowSpan: "row-span-1",
-    imgSrc: "/path/to/image2.jpg"
+    imgSrc: "\image2.png"
   },
   
   { 
@@ -52,7 +52,7 @@ const services = [
     bgColor: "#E7F9F2",
     colSpan: "col-span-12 md:col-span-8",
     rowSpan: "row-span-1",
-    imgSrc: "/path/to/image4.jpg"
+    imgSrc: "\image4a.png"
   },
   { 
     title: "Fast, Reliable Blood Delivery", 
@@ -60,7 +60,7 @@ const services = [
     bgColor: "#F2F9E7",
     colSpan: "col-span-6 md:col-span-4",
     rowSpan: "row-span-2",
-    imgSrc: "/path/to/image6.jpg"
+    imgSrc: "\image6.png"
   },
   
   { 
@@ -77,14 +77,14 @@ const services = [
     bgColor: "#F2E7E7",
     colSpan: "col-span-6 md:col-span-2",
     rowSpan: "row-span-1",
-    imgSrc: "/path/to/image8.jpg"
+    imgSrc: "\image8.png"
   },
   
 ];
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-[#FBFBF9]">
+    <div className="min-h-screen bg-[#F4F4ED]">
       <div className="container mx-auto px-4 md:px-12 py-12 md:py-20">
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-10 text-[#333333]" style={{ fontFamily: "Poppins, sans-serif" }}>
           Our Services
@@ -115,10 +115,14 @@ const ServiceCard = ({ service }) => (
       className="w-full h-3/4 rounded-t-2xl object-cover"
     />
     <div className="h-1/4 flex flex-col justify-center text-center py-3">
-      <h3 className="text-lg md:text-xl font-semibold text-[#222222] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>
+      <h3 className="text-lg md:text-xl font-semibold text-[#222222] mb-2" 
+      style={{ fontFamily: "Poppins, sans-serif" }}
+      >
         {service.title}
       </h3>
-      <p className="text-gray-600 text-sm md:text-base leading-relaxed" style={{ fontFamily: "Roboto, sans-serif" }}>
+      <p className="text-gray-600 text-sm md:text-base leading-relaxed" 
+      style={{ fontFamily: "Roboto, sans-serif" }}
+      >
         {service.description}
       </p>
     </div>
