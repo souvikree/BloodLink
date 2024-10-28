@@ -12,6 +12,7 @@ import com.example.bloodlinkapplication.Fragments.ProfilePageBloodLink
 import com.example.bloodlinkapplication.Fragments.RequestPageBloodLink
 import com.example.bloodlinkapplication.R
 import com.example.bloodlinkapplication.databinding.ActivityMainBinding
+import com.example.bloodlinkapplication.dateClass.BloodRequest
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -37,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+
 
     private fun replaceFragment(fragment: Fragment){
         val fragmentManager = supportFragmentManager

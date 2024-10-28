@@ -51,4 +51,7 @@ dependencies {
 
     //Circular Image view
     implementation(libs.circleimageview)
+
+    //Load Image from net
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
