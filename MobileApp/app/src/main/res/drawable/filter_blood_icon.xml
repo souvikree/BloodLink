@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/filter_icon"
+        android:bottom="20dp"
+        />
+    <item
+        android:drawable="@drawable/drop_icon"
+        android:start="40dp"
+        android:end="40dp"
+        android:top="100dp"
+        android:gravity="bottom"/>
+</layer-list>

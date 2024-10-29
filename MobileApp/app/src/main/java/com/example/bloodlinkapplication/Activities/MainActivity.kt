@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -27,6 +28,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         replaceFragment(HomePageBloodLink())
+
+
+
         binding.bottomNavigationView.setOnItemSelectedListener {item->
                 when(item.itemId){
                     R.id.home-> replaceFragment(HomePageBloodLink())

@@ -53,5 +53,9 @@ dependencies {
     implementation(libs.circleimageview)
 
     //Load Image from net
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
+    implementation(libs.circleindicator)
+    implementation(libs.whynotimagecarousel)
+
+
 }
