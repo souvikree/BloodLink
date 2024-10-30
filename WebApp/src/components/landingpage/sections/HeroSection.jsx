@@ -1,6 +1,6 @@
 import Image from 'next/image';
-// import "@fontsource/poppins"; 
-// import "@fontsource/roboto"; 
+import "@fontsource/poppins"; 
+import "@fontsource/roboto"; 
 
 export default function HeroSection() {
   return (
