@@ -12,12 +12,14 @@ import com.example.bloodlinkapplication.Fragments.ProfilePageBloodLink
 import com.example.bloodlinkapplication.Fragments.RequestPageBloodLink
 import com.example.bloodlinkapplication.R
 import com.example.bloodlinkapplication.databinding.ActivityMainBinding
+import com.example.bloodlinkapplication.dateClass.BloodRequest
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -26,6 +28,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         replaceFragment(HomePageBloodLink())
+
+
+
         binding.bottomNavigationView.setOnItemSelectedListener {item->
                 when(item.itemId){
                     R.id.home-> replaceFragment(HomePageBloodLink())
@@ -37,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+
 
     private fun replaceFragment(fragment: Fragment){
         val fragmentManager = supportFragmentManager

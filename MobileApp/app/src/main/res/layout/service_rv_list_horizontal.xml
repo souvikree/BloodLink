@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/serviceConstraintLayoutServiceList"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="4dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/serviceCardViewServiceList"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="13dp"
+        app:cardBackgroundColor="@color/pinkish"
+        app:strokeColor="#000000"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            >
+            <ImageButton
+                android:id="@+id/serviceImageButtonServiceList"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/bloodsearchicon"
+                android:padding="5dp"
+                android:background="@drawable/ovalshapegradient"
+                android:src="@drawable/bloodsearchicon"
+                android:scaleType="fitXY"
+                />
+
+            <TextView
+                android:id="@+id/serviceNameServiceList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="15dp"
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/find_donor"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

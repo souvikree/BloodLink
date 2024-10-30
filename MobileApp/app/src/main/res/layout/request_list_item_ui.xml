@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter_medium"
                 android:textColor="@color/black"
-                android:textSize="24sp"
+                android:textSize="18sp"
                 android:text="Name" />
 
             <TextView
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter_medium"
                 android:textColor="@color/black"
-                android:textSize="18sp"
+                android:textSize="13sp"
                 android:text="Location" />
 
             <TextView
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter_medium"
                 android:textColor="@color/black"
-                android:textSize="18sp"
+                android:textSize="13sp"
                 android:text="Blood Group" />
         </LinearLayout>
 
@@ -65,7 +65,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/requests"
-            app:cornerRadius="15dp"
+            app:cornerRadius="13dp"
+            android:textColor="@color/white"
             android:backgroundTint="@color/red"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

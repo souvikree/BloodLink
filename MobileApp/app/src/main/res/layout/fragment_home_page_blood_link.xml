@@ -39,10 +39,11 @@
     </com.google.android.material.appbar.MaterialToolbar>
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mainScreenToolBar"
         >
 
@@ -63,15 +64,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 >
-
-                <ImageView
+                <org.imaginativeworld.whynotimagecarousel.ImageCarousel
+                    android:id="@+id/mainPageBannerImageCarousel"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/here_villbe_list_of_image"
-                    android:src="@drawable/test_image"
-                    android:scaleType="fitXY"
+                    android:layout_height="256dp"
+                    app:showNavigationButtons="false"
+                    app:imageScaleType="centerCrop"
+                    app:autoPlay="true"
+                    app:autoPlayDelay="3000"
+                    app:infiniteCarousel="true"
 
                     />
+
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -87,138 +91,28 @@
                 app:layout_constraintTop_toBottomOf="@+id/mainPageBannerCard"
                 app:layout_constraintStart_toStartOf="parent"
                 />
-            <HorizontalScrollView
-                android:id="@+id/serviceHorizontalScrollViewMainPage"
+
+            <TextView
+                android:id="@+id/ViewAllServicesHomePage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/view_all"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@+id/mainPageBannerCard"
+                app:layout_constraintEnd_toEndOf="parent"
+
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/serviceHorizontalRvViewMainPage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 app:layout_constraintTop_toBottomOf="@+id/serviceTextViewStill"
-
-                >
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    >
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="13dp"
-                        app:cardBackgroundColor="@color/pinkish"
-                        app:strokeColor="#000000"
-                        app:strokeWidth="1dp"
-                        android:layout_weight="1">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:orientation="horizontal"
-                            >
-                            <ImageButton
-                                android:layout_width="40dp"
-                                android:layout_height="wrap_content"
-                                android:contentDescription="@string/bloodsearchicon"
-                                android:padding="5dp"
-                                android:background="@drawable/ovalshapegradient"
-                                android:src="@drawable/bloodsearchicon"
-                                android:scaleType="fitXY"
-                                />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="15dp"
-                                android:fontFamily="@font/inter_medium"
-                                android:text="@string/find_donor"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
-
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/materialCardButtonForDonatesServiceMainPage"
-                        android:layout_width="0dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="13dp"
-                        app:cardBackgroundColor="@color/pinkish"
-                        app:strokeColor="#000000"
-                        app:strokeWidth="1dp"
-                        android:layout_weight="1">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:orientation="horizontal"
-                            >
-                            <ImageButton
-                                android:layout_width="40dp"
-                                android:layout_height="wrap_content"
-                                android:contentDescription="@string/blood_donates_icon"
-                                android:padding="5dp"
-                                android:background="@drawable/ovalshapegradient"
-                                android:src="@drawable/bloodsearchicon"
-                                android:scaleType="fitXY"
-                                />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="15dp"
-                                android:fontFamily="@font/inter_medium"
-                                android:text="@string/find_donor"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
-
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/materialCardButtonForOrderServiceMainPage"
-                        android:layout_width="0dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="13dp"
-                        app:cardBackgroundColor="@color/pinkish"
-                        app:strokeColor="#000000"
-                        app:strokeWidth="1dp"
-                        android:layout_weight="1">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:padding="5dp"
-                            android:orientation="horizontal"
-                            >
-                            <ImageButton
-                                android:layout_width="40dp"
-                                android:layout_height="wrap_content"
-                                android:contentDescription="@string/bloodsearchicon"
-                                android:padding="5dp"
-                                android:background="@drawable/ovalshapegradient"
-                                android:src="@drawable/bloodsearchicon"
-                                android:scaleType="fitXY"
-                                />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_marginStart="15dp"
-
-                                android:fontFamily="@font/inter_medium"
-                                android:text="@string/find_donor"
-                                android:textColor="@color/black"
-                                android:textSize="16sp" />
-
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-            </HorizontalScrollView>
+                />
 
             <TextView
                 android:id="@+id/RequestBloodTextView"
@@ -230,7 +124,7 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:layout_marginTop="20dp"
-                app:layout_constraintTop_toBottomOf="@+id/serviceHorizontalScrollViewMainPage"
+                app:layout_constraintTop_toBottomOf="@+id/serviceHorizontalRvViewMainPage"
                 app:layout_constraintStart_toStartOf="parent"
                 />
 
@@ -245,19 +139,22 @@
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
-                app:layout_constraintTop_toBottomOf="@+id/serviceHorizontalScrollViewMainPage"
+                app:layout_constraintTop_toBottomOf="@+id/serviceHorizontalRvViewMainPage"
                 app:layout_constraintEnd_toEndOf="parent"
                 />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:clipToPadding="false"
                 android:id="@+id/RequestsRecyclerViewMainPage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:layout_constraintTop_toBottomOf="@id/ViewAllRequestTextView"
-
+                tools:listitem="@layout/request_list_item_ui"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </ScrollView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

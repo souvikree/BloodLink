@@ -51,4 +51,11 @@ dependencies {
 
     //Circular Image view
     implementation(libs.circleimageview)
+
+    //Load Image from net
+    implementation(libs.glide)
+    implementation(libs.circleindicator)
+    implementation(libs.whynotimagecarousel)
+
+
 }
