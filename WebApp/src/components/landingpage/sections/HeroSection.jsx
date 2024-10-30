@@ -19,7 +19,7 @@ export default function HeroSection() {
       </div>
 
       {/* Text Content */}
-      <div className="relative container mx-auto px-4 py-16 md:py-24 z-10">
+      <div className="relative container mx-auto px-12 py-16 md:py-24 z-10">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="md:w-3/4 lg:w-1/2 text-center md:text-left">
             <h1
