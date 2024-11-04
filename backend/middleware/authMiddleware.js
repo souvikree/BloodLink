@@ -82,7 +82,7 @@ const user = asyncHandler(async (req, res, next) => {
 
 // Role-based middleware for blood banks
 const bloodBank = asyncHandler(async (req, res, next) => {
-    if (req.user && req.user instanceof BloodBank) {
+    if (req.user && (req.user instanceof BloodBank || req.user instanceof Admin)) {
         next();
     } else {
         res.status(403);
