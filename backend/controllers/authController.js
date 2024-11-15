@@ -9,6 +9,7 @@ const Donor = require('../models/Donor');
 const DeliveryPersonnel = require('../models/Delivery');
 const Admin = require('../models/Admin');
 const User = require('../models/User');
+const geocodeAddress = require('../services/geoLocationService');
 
 const generateToken = (id, role) => {
     return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -63,7 +64,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 // User signup
 const signupUser = asyncHandler(async (req, res) => {
-    const { name, email, password, role, phone, bloodType } = req.body;  
+    const { name, email, password, role, phone, bloodType, address } = req.body;  
    
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -72,7 +73,14 @@ const signupUser = asyncHandler(async (req, res) => {
             user = await User.create({ name, email, password: hashedPassword, phone });  
             break;
         case 'bloodBank':
-            user = await BloodBank.create({ name, email, password: hashedPassword });
+            const bloodBankCoordinates = await geocodeAddress(address);
+            user = await BloodBank.create({
+                name,
+                email,
+                password: hashedPassword,
+                address,
+                location: { type: "Point", coordinates: bloodBankCoordinates },
+            });
             break;
         case 'donor':
             user = await Donor.create({ name, email, password: hashedPassword, phone, bloodType }); //user = await Donor.create({ name, email, password: hashedPassword, phone, bloodType, location: { type: "Point", coordinates } });
