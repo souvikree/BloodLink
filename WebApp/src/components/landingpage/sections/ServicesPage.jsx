@@ -1,20 +1,20 @@
 import React from "react";
-// import "@fontsource/poppins"; 
-// import "@fontsource/roboto";  
+import "@fontsource/poppins";
+import "@fontsource/roboto";
 
 const services = [
   { 
     id: 1,
-    title: "Find Blood Faster, Save Lives", 
+    title: "Find Blood Faster, Save Lives",
     description: "Instantly check real-time blood availability and nearby blood banks, ensuring efficient searches during emergencies.",
     bgColor: "#F9F2E7",
     colSpan: "col-span-12 md:col-span-8",
     rowSpan: "row-span-1",
-    imgSrc: "\image1.png" 
+    imgSrc: "\image1.png"
   },
   { 
     id: 2,
-    title: "Manage Donations & Supplies Seamlessly", 
+    title: "Manage Donations & Supplies Seamlessly",
     description: "Blood banks and donors get dedicated dashboards to manage supplies and respond to requests effectively.",
     bgColor: "#F9E7F2",
     colSpan: "col-span-6 md:col-span-4",
@@ -82,7 +82,7 @@ const services = [
   { 
     id: 9,
     title: "Join a Life-Saving Community", 
-    description: "Patients, donors, and blood banks enjoy a seamless registration and onboarding experience.",
+    description: " ",
     bgColor: "#F2E7E7",
     colSpan: "col-span-6 md:col-span-2",
     rowSpan: "row-span-1",
@@ -171,7 +171,7 @@ const ServiceCard = ({ service }) => {
       ) : (
         
         <div className="flex flex-col justify-center items-center text-center py-6 px-4">
-          <h3 className="text-xl md:text-2xl font-semibold text-[#222222] mb-3" 
+          <h3 className="text-xl md:text-3xl font-semibold text-[#222222] mb-3" 
           style={{ fontFamily: "Poppins, sans-serif" }}
           >
             {service.title}

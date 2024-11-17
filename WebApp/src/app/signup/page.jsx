@@ -10,9 +10,9 @@ export default function SignupPage() {
 
                 {/* Image Section */}
                 <div
-                    className="hidden md:block md:w-1/2  bg-cover bg-center relative"
+                    className="hidden md:block md:w-1/2 bg-cover bg-center relative"
                     style={{
-                        backgroundImage: "url('\signup1.jpg')", // Ensure this path is correct
+                        backgroundImage: "url('/signup1.jpg')", // Ensure this path is correct
                     }}
                 >
                     {/* Overlay with slight opacity */}
@@ -26,7 +26,7 @@ export default function SignupPage() {
                     <form className="w-full max-w-sm space-y-5">
                         <FloatingLabelInput label="Full Name" type="text" />
                         <FloatingLabelInput label="Email" type="email" />
-                        <FloatingLabelInput label="Password" type="password" />
+                        <FloatingLabelInput label="Password" type="password" minLength={8} />
                         <button
                             type="submit"
                             className="w-full py-3 bg-gradient-to-r from-[#FF4B4B] to-[#FF7A7A] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-transform duration-300"
@@ -58,9 +58,17 @@ export default function SignupPage() {
     );
 }
 
-function FloatingLabelInput({ label, type }) {
+function FloatingLabelInput({ label, type, minLength }) {
     const [focused, setFocused] = useState(false);
     const [value, setValue] = useState("");
+    const [isValid, setIsValid] = useState(true);
+
+    const handleBlur = () => {
+        setFocused(value !== "");
+        if (type === "password" && minLength) {
+            setIsValid(value.length >= minLength);
+        }
+    };
 
     return (
         <div className="relative w-full">
@@ -68,15 +76,18 @@ function FloatingLabelInput({ label, type }) {
                 type={type}
                 value={value}
                 onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(value !== "")}
+                onBlur={handleBlur}
                 onChange={(e) => setValue(e.target.value)}
-                className={`w-full h-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:border-[#FF4B4B] focus:ring-2 focus:ring-[#FF4B4B] text-gray-800 placeholder-transparent transition duration-200 ${focused || value ? "pt-6" : "pt-3"}`}
+                className={`w-full h-12 p-3 bg-gray-50 border ${isValid ? "border-gray-300" : "border-red-500"} rounded-md focus:border-[#FF4B4B] focus:ring-2 focus:ring-[#FF4B4B] text-gray-800 placeholder-transparent transition duration-200 ${focused || value ? "pt-6" : "pt-3"}`}
             />
             <label
                 className={`absolute left-4 text-gray-500 transition-all duration-200 pointer-events-none ${focused || value ? "text-xs -top-2 bg-white px-1" : "text-base top-3"}`}
             >
                 {label}
             </label>
+            {!isValid && (
+                <p className="text-red-500 text-xs mt-1">Password must be at least {minLength} characters long.</p>
+            )}
         </div>
     );
 }
