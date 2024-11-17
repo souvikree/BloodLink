@@ -16,4 +16,6 @@
     <string name="profile">Profile</string>
     <string name="search">Search...</string>
     <string name="company_logo">Company Logo</string>
+    <string name="messageApiLink">/api/chatbot/message</string>
+    <string name="speak_or_type_your_querys">Speak or type your querys</string>
 </resources>
