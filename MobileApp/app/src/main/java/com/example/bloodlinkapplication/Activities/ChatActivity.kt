@@ -32,6 +32,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var adapter: ChatAdapter
     private val voiceInputStatus = MutableLiveData(false)
     private lateinit var permissionHelper: PermissionHelper
+
     private val recognitionCustom = registerForActivityResult(RecognitionContract()) { result ->
         if (result.isNotEmpty()) {
             binding?.editTextChatActivity?.setText(result)
@@ -52,6 +53,17 @@ class ChatActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        lifecycleScope.launch {
+            sendMessageToBackend("") { message ->
+                Log.d("message Bot data", message)
+
+                // Check if the backend message is valid
+                val messageBot = MessageShow(Message(message, false), false)
+                adapter.updateData(messageBot) // Update UI with bot's response
+            }
+        }
+
+
         permissionHelper = PermissionHelper(this)
         if (!permissionHelper.isMicrophonePermissionGranted()) {
             permissionHelper.requestMicrophonePermission()

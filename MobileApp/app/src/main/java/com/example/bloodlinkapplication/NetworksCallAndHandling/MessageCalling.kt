@@ -7,6 +7,18 @@ import retrofit2.Response
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+fun setUpConnection() : ApiCallingInterfaceMessage {
+    val BASE_URL = "https://bloodlink-flsd.onrender.com/"
+    val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val service = retrofit.create(ApiCallingInterfaceMessage::class.java)
+    return service
+}
 // Function to send message and get a response from the server
 suspend fun sendMessageToBackend(message: String, onResponse: (String) -> Unit) {
     val retrofit = Retrofit.Builder()
