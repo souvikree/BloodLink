@@ -47,24 +47,39 @@ const getProfile = async (req, res) => {
     res.json(patient);
   };
   
-const updateProfile = async (req, res) => {
-    const patient = await Patient.findById(req.user._id);
-    if (!patient) return res.status(404).json({ message: 'Not found' });
+  const updateProfile = async (req, res) => {
+    try {
+      const patient = await Patient.findById(req.user._id);
+      if (!patient) return res.status(404).json({ message: 'Not found' });
   
-    const updates = ['name', 'bloodGroup', 'emergencyContact', 'medicalRecords'];
-    updates.forEach((field) => {
-      if (req.body[field]) patient[field] = req.body[field];
-    });
+      const updates = ['name', 'bloodGroup', 'emergencyContact', 'medicalRecords'];
+      updates.forEach((field) => {
+        if (req.body[field]) patient[field] = req.body[field];
+      });
   
-    if (req.body.location) {
-      patient.location = {
-        type: 'Point',
-        coordinates: req.body.location, // [lng, lat]
-      };
+      // If coordinates are passed directly
+      if (req.body.location) {
+        patient.location = {
+          type: 'Point',
+          coordinates: req.body.location, // [lng, lat]
+        };
+      }
+  
+      // If address string is passed instead
+      if (req.body.address) {
+        const coordinates = await getCoordinates(req.body.address);
+        patient.location = {
+          type: 'Point',
+          coordinates,
+        };
+      }
+  
+      await patient.save();
+      res.json({ message: 'Profile updated successfully' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error updating profile' });
     }
-  
-    await patient.save();
-    res.json({ message: 'Profile updated' });
   };
   
 
