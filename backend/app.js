@@ -13,6 +13,7 @@ const donorRoutes = require('./routes/donorRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
+const patientRoutes = require('./routes/PatientRoutes/patientRoutes');
 
 
 // Connect to the database
@@ -25,6 +26,8 @@ app.use(cors());
 app.use(helmet()); 
 app.use(morgan('dev')); 
 app.use(bodyParser.json()); 
+app.use(express.json()); 
+
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -34,6 +37,9 @@ app.use('/api/donors', donorRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+
+
+app.use('/api/patients', patientRoutes);
 
 // Health check route
 app.get('/', (req, res) => {

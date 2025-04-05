@@ -73,13 +73,13 @@ const signupUser = asyncHandler(async (req, res) => {
             user = await User.create({ name, email, password: hashedPassword, phone });  
             break;
         case 'bloodBank':
-            const bloodBankCoordinates = await geocodeAddress(address);
+            // const bloodBankCoordinates = await geocodeAddress(address);
             user = await BloodBank.create({
                 name,
                 email,
                 password: hashedPassword,
                 address,
-                location: { type: "Point", coordinates: bloodBankCoordinates },
+                // location: { type: "Point", coordinates: bloodBankCoordinates },
             });
             break;
         case 'donor':

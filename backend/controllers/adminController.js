@@ -28,7 +28,7 @@ const updateAdminRole = asyncHandler(async (req, res) => {
 });
 
 const deleteAdmin = asyncHandler(async (req, res) => {
-    const admin = await Admin.findById(req.params.id);
+    const admin = await Admin.findById(req.params.id).exec(); // Use exec() to ensure it's a Mongoose document instance
     if (admin) {
         await admin.remove();
         res.json({ message: 'Admin removed' });
@@ -36,6 +36,7 @@ const deleteAdmin = asyncHandler(async (req, res) => {
         res.status(404).json({ message: 'Admin not found' });
     }
 });
+
 
 module.exports = {
     getAllAdmins,

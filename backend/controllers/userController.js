@@ -17,10 +17,18 @@ const getUserById = asyncHandler(async (req, res) => {
     }
 });
 
-
 const updateUser = asyncHandler(async (req, res) => {
+    // Log the request body for debugging
+    console.log(req.body);
+
+    // Check if req.body exists and contains data
+    if (!req.body) {
+        return res.status(400).json({ message: "Request body is missing or empty" });
+    }
+
     const user = await User.findById(req.params.id);
     if (user) {
+        // Check if each field is provided in the request body, and update only if present
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
         user.phone = req.body.phone || user.phone;
@@ -33,15 +41,17 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 });
 
+
 const deleteUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (user) {
-        await user.remove();
+        await User.deleteOne({ _id: req.params.id });  // Correct method to delete
         res.json({ message: 'User removed' });
     } else {
         res.status(404).json({ message: 'User not found' });
     }
 });
+
 
 module.exports = {
     getAllUsers,

@@ -72,7 +72,7 @@ const admin = asyncHandler(async (req, res, next) => {
 
 // Role-based middleware for patients
 const user = asyncHandler(async (req, res, next) => {
-    if (req.user && req.user instanceof User) {
+    if (req.user && (req.user instanceof User || req.user instanceof Admin)) {
         next();
     } else {
         res.status(403);
