@@ -15,6 +15,7 @@ const {
 } = require('../../controllers/OrderController/searchBloodBanks.js');
 const { protect } = require('../../middleware/PatientMiddleware/authMiddlewares.js');
 const { addAddressAfterRegistration } = require('../../controllers/PatientController/addAddressAfterRegistration.js');
+const { uploadPrescription } = require("../../middleware/BloodBankMiddleware/upload");
 
 
 const router = express.Router();
@@ -29,7 +30,7 @@ router.put('/profile', protect, updateProfile);
 
 router.get('/search', protect, searchNearby);
 router.get('/search-banks', searchBloodBanks);
-router.post('/order', protect, placeOrder);
+router.post('/place-order', protect, uploadPrescription.single('prescription'), placeOrder);
 router.get('/orders/history', protect, getOrderHistory);
 
 module.exports = router;

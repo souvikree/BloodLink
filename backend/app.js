@@ -4,6 +4,8 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { errorHandler, notFound } = require('./middleware/errorHandler'); // Adjust path as needed
+require('dotenv').config();
+
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');

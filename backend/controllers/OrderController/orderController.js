@@ -1,5 +1,7 @@
 const Order = require('../../models/patientModel/Order');
 const Inventory = require('../../models/BloodBankModel/Inventory');
+const handlingChargeMap = require('../../config/handlingCharges');
+// const axios = require("axios");
 
 const placeOrder = async (req, res) => {
   try {
@@ -9,23 +11,37 @@ const placeOrder = async (req, res) => {
     // Convert units to liters (1 unit = 0.45 liters)
     const quantityInLiters = units * 0.45;
 
-    // Find inventory for that blood bank and blood type
+    // Fetch inventory
     const inventory = await Inventory.findOne({ bloodBankId: bloodBank, bloodGroup: bloodType });
 
     if (!inventory || inventory.quantity < quantityInLiters) {
       return res.status(400).json({ message: "Insufficient blood units available." });
     }
 
-    // Calculate price
-    const totalPrice = inventory.pricePerLiter * quantityInLiters;
+    // Get handling charge per unit (bag)
+    const handlingChargePerBag = handlingChargeMap[bloodType];
+    if (!handlingChargePerBag) {
+      return res.status(400).json({ message: "Invalid or unsupported blood type." });
+    }
 
-    // Create order
+    const totalHandlingCharge = units * handlingChargePerBag;
+    const serviceCharge = 30; // Flat rate for now
+    const totalPrice = totalHandlingCharge + serviceCharge;
+
+    // ✅ Get prescription URL from Cloudinary (if uploaded)
+    const prescriptionUrl = req.file?.path || null;
+
+    // Create the order
     const order = await Order.create({
       patient: req.user._id,
       bloodBank,
       bloodType,
       quantity: units,
       deliveryAddress,
+      handlingCharge: totalHandlingCharge,
+      serviceCharge,
+      totalPrice,
+      prescriptionUrl, // ✅ Save the Cloudinary URL here
     });
 
     // Deduct from inventory
@@ -34,8 +50,14 @@ const placeOrder = async (req, res) => {
 
     res.status(201).json({
       message: "Order placed successfully",
-      totalPrice,
       order,
+      charges: {
+        handlingChargePerBag,
+        quantity: units,
+        totalHandlingCharge,
+        serviceCharge,
+        totalPrice
+      }
     });
   } catch (err) {
     console.error(err);

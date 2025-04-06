@@ -6,11 +6,15 @@ const orderSchema = new mongoose.Schema({
   bloodType: { type: String, required: true },
   quantity: { type: Number, required: true },
   deliveryAddress: { type: String, required: true },
+  prescriptionUrl: { type: String, required: true },
   status: {
     type: String,
     enum: ['pending', 'accepted', 'ready', 'rejected', 'delivered', 'cancelled'],
     default: 'pending',
   },
+  handlingCharge: { type: Number },
+  serviceCharge: { type: Number },
+  totalPrice: { type: Number },
   requestedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
