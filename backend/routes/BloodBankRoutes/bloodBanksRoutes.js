@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require("../../controllers/BloodBankController/bloodBankController");
 const { verifyToken } = require("../../middleware/BloodBankMiddleware/BloodBankMiddlewares");
 const { requireRole } = require("../../middleware/BloodBankMiddleware/roleMiddleware");
-const upload = require("../../middleware/BloodBankMiddleware/upload");
+const { uploadExcel } = require("../../middleware/BloodBankMiddleware/upload");
 // Auth
 router.post("/register", controller.register);
 router.post("/login", controller.login);
@@ -17,7 +17,28 @@ router.put("/profile", controller.updateProfile);
 
 // Inventory
 router.post("/inventory/add",controller.addInventory);
-router.post("/inventory/bulk-upload",upload.single("file"),controller.bulkUploadInventory);
+// router.post("/inventory/bulk-upload",uploadExcel.single("file"),controller.bulkUploadInventory);
+
+router.post("/inventory/bulk-upload", uploadExcel.single("file"), async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+  
+      console.log("✅ Uploaded Excel File Info:", req.file);
+  
+      // You can send it back for quick testing:
+      // return res.json({ file: req.file });
+  
+      // Or continue to your controller logic
+      await controller.bulkUploadInventory(req, res, next);
+    } catch (error) {
+      console.error("❌ Upload Error:", error.message);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  
 router.post("/inventory/:inventoryId", controller.updateInventory);
 router.get("/inventory", controller.getInventory);
 

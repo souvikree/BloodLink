@@ -1,10 +1,13 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const axios = require("axios");
+
 const xlsx = require("xlsx");
 const fs = require("fs");
 
 const BloodBank = require("../../models/BloodBankModel/BloodBank");
+const Order = require("../../models/patientModel/Order");
 const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
 const { updateInventory, getInventoryStats } = require("../../services/BloodBankService/inventoryService");
@@ -62,40 +65,56 @@ exports.updateProfile = async (req, res) => {
 
 exports.addInventory = async (req, res) => {
   try {
-    const { bloodGroup, quantity, pricePerLiter } = req.body;
+    const { bloodGroup, quantity } = req.body;
     const bloodBankId = req.user.id;
 
     // Check if this blood group is already added for this blood bank
     const existing = await Inventory.findOne({ bloodBankId, bloodGroup });
+
     if (existing) {
-      return res.status(400).json({ message: "Blood group already exists in inventory." });
+      // Update the quantity by adding the new quantity
+      existing.quantity += quantity;
+      await existing.save();
+
+      return res.status(200).json({
+        message: "Existing inventory updated successfully.",
+        inventory: existing,
+      });
     }
 
+    // Create a new inventory entry
     const inventory = new Inventory({
       bloodGroup,
       quantity,
-      pricePerLiter,
       bloodBankId,
     });
 
     await inventory.save();
 
     res.status(201).json({
-      message: "Inventory added successfully.",
+      message: "New inventory added successfully.",
       inventory,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Server error while updating inventory." });
   }
 };
+
 
 //=====================
 //*BULK ADD INVENTORY*//
 //======================
 exports.bulkUploadInventory = async (req, res) => {
   try {
-    const filePath = req.file.path;
-    const workbook = xlsx.readFile(filePath);
+    const fileUrl = req.file?.path; // Cloudinary URL
+    if (!fileUrl) {
+      return res.status(400).json({ error: "File upload failed." });
+    }
+
+    // Download the file from Cloudinary
+    const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
+    const workbook = xlsx.read(response.data, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
 
@@ -106,9 +125,9 @@ exports.bulkUploadInventory = async (req, res) => {
     let updated = 0;
 
     for (let i = 0; i < data.length; i++) {
-      const { bloodGroup, quantity, pricePerLiter } = data[i];
+      const { bloodGroup, quantity } = data[i];
 
-      if (!bloodGroup || quantity == null || pricePerLiter == null) {
+      if (!bloodGroup || quantity == null) {
         errors.push({ row: i + 2, error: "Missing required fields" });
         continue;
       }
@@ -121,24 +140,18 @@ exports.bulkUploadInventory = async (req, res) => {
       const existing = await Inventory.findOne({ bloodBankId, bloodGroup });
 
       if (existing) {
-        // 🔄 Update existing quantity and price
         existing.quantity += Number(quantity);
-        existing.pricePerLiter = Number(pricePerLiter);
         await existing.save();
         updated++;
       } else {
-        // ➕ Insert new entry
         await Inventory.create({
           bloodGroup,
           quantity: Number(quantity),
-          pricePerLiter: Number(pricePerLiter),
           bloodBankId,
         });
         inserted++;
       }
     }
-
-    fs.unlinkSync(filePath); // 🧹 Delete file after processing
 
     res.status(200).json({
       message: "Bulk upload completed",
@@ -162,11 +175,11 @@ exports.bulkUploadInventory = async (req, res) => {
 exports.updateInventory = async (req, res) => {
   try {
     const { inventoryId } = req.params;
-    const { quantity, pricePerLiter } = req.body;
+    const { quantity } = req.body;
 
     const inventory = await Inventory.findOneAndUpdate(
       { _id: inventoryId, bloodBankId: req.user.id },
-      { quantity, pricePerLiter },
+      { quantity },
       { new: true }
     );
 
@@ -188,7 +201,7 @@ exports.getInventory = async (req, res) => {
 // Orders
 exports.getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ bloodBankId: req.user.id }).sort({ createdAt: -1 });
+    const orders = await Order.find({ bloodBank: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -206,7 +219,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const order = await Order.findOneAndUpdate(
-      { _id: orderId, bloodBankId: req.user.id },
+      { _id: orderId, bloodBank: req.user.id },
       { status },
       { new: true }
     );
