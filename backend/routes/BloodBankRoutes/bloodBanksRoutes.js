@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require("../../controllers/BloodBankController/bloodBankController");
 const { verifyToken } = require("../../middleware/BloodBankMiddleware/BloodBankMiddlewares");
 const { requireRole } = require("../../middleware/BloodBankMiddleware/roleMiddleware");
-const { uploadExcel } = require("../../middleware/BloodBankMiddleware/upload");
+const { uploadExcel, uploadLicense } = require("../../middleware/BloodBankMiddleware/upload");
 // Auth
 router.post("/register", controller.register);
 router.post("/login", controller.login);
@@ -14,6 +14,9 @@ router.use(requireRole("bloodbank")); // also applies only below
 
 router.get("/profile", controller.getProfile);
 router.put("/profile", controller.updateProfile);
+
+//upload license
+router.post("/upload-license", uploadLicense.single("license"), controller.uploadLicense);
 
 // Inventory
 router.post("/inventory/add",controller.addInventory);
@@ -45,5 +48,8 @@ router.get("/inventory", controller.getInventory);
 // Orders
 router.get("/orders", controller.getOrders);
 router.put("/orders/:orderId", controller.updateOrderStatus);
+
+
+
 
 module.exports = router;

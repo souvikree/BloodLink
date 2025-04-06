@@ -13,22 +13,39 @@ const { getCoordinates } = require("../../utils/geocode");
 const { updateInventory, getInventoryStats } = require("../../services/BloodBankService/inventoryService");
 // const { getOrdersByBank } = require("../../services/OrderService/orderService");
 
-// Register Blood Bank
+
 exports.register = async (req, res) => {
-  const { name, licenseId, email, password, contactNumber, address } = req.body;
-  const existing = await BloodBank.findOne({ email });
-  if (existing) return res.status(400).json({ msg: "Email already registered" });
+  try {
+    const { name, licenseId, email, password, contactNumber, address } = req.body;
 
-  const hashed = await bcrypt.hash(password, 10);
-  // const coordinates = await getCoordinates(address);
+    const existing = await BloodBank.findOne({ email });
+    if (existing) return res.status(400).json({ msg: "Email already registered" });
 
-  const bank = await BloodBank.create({
-    name, licenseId, email, password: hashed, contactNumber, address
-    // location: { type: "Point", coordinates }
-  });
+    const hashed = await bcrypt.hash(password, 10);
 
-  res.status(201).json({ msg: "Registered. Awaiting approval." });
+    const bloodBank = await BloodBank.create({
+      name,
+      licenseId,
+      email,
+      password: hashed,
+      contactNumber,
+      address,
+      status: "pending", // 🚦 Add this for approval process
+      licenseDocumentUrl: null, // ⛔ To be uploaded after registration
+      // location: { type: "Point", coordinates } // optional if you use geocoding
+    });
+
+    res.status(201).json({
+      msg: "Registration successful. Please upload your license certificate to complete the process.",
+      bloodBankId: bloodBank._id,
+    });
+
+  } catch (err) {
+    console.error("Registration Error:", err);
+    res.status(500).json({ msg: "Server error during registration" });
+  }
 };
+
 
 // Login
 exports.login = async (req, res) => {
@@ -165,6 +182,34 @@ exports.bulkUploadInventory = async (req, res) => {
   }
 };
 
+
+exports.uploadLicense = async (req, res) => {
+  try {
+    const bloodBankId = req.user.id;
+
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const updated = await BloodBank.findByIdAndUpdate(
+      bloodBankId,
+      { licenseDocumentUrl: req.file.path },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Blood bank not found" });
+    }
+
+    res.status(200).json({
+      message: "License uploaded successfully. Verification will take 3–4 hours.",
+      licenseUrl: updated.licenseDocumentUrl,
+    });
+  } catch (err) {
+    console.error("License Upload Error:", err);
+    res.status(500).json({ message: "Server error during license upload" });
+  }
+};
 
 
 // exports.updateInventory = async (req, res) => {
