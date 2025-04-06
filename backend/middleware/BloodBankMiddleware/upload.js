@@ -43,9 +43,35 @@ const prescriptionStorage = new CloudinaryStorage({
 
 const uploadPrescription = multer({ storage: prescriptionStorage });
 
+
+//// -----------------------------------------
+// License Uploads (PDF/Image)
+//// -----------------------------------------
+const licenseStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'bloodlink/licenses',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+    resource_type: 'auto',
+  },
+});
+
+const uploadLicense = multer({ 
+  storage: licenseStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+    const ext = file.originalname.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      return cb(new Error("Only PDF or image files are allowed"), false);
+    }
+    cb(null, true);
+  }
+});
+
 module.exports = {
   uploadExcel,
-  uploadPrescription
+  uploadPrescription,
+  uploadLicense
 };
 
 
