@@ -12,7 +12,6 @@ import com.example.bloodlinkapplication.Fragments.ProfilePageBloodLink
 import com.example.bloodlinkapplication.Fragments.RequestPageBloodLink
 import com.example.bloodlinkapplication.R
 import com.example.bloodlinkapplication.databinding.ActivityMainBinding
-import com.example.bloodlinkapplication.dateClass.BloodRequest
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding

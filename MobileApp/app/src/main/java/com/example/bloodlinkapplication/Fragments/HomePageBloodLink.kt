@@ -1,11 +1,13 @@
 package com.example.bloodlinkapplication.Fragments
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.bloodlinkapplication.Activities.ChatActivity
 import com.example.bloodlinkapplication.GetData.bloodRequestsFakeData
 import com.example.bloodlinkapplication.GetData.servicesList
 import com.example.bloodlinkapplication.adapters.RequestListAdapterRV
@@ -32,6 +34,10 @@ class HomePageBloodLink : Fragment() {
         setupRV(bloodRequestsFakeData)
         setupRVForService(servicesList)
         carouselViewSetup()
+        binding.chatButton.setOnClickListener {
+            val intent = Intent(requireContext(), ChatActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupRVForService(serviceList:List<Services>){
