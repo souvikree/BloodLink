@@ -1,6 +1,6 @@
 const Redis = require('ioredis');
 
-// Use the container hostname "redis" inside Docker
+//use redis container
 const redis = new Redis(process.env.REDIS_URL || {
   host: process.env.REDIS_HOST || 'redis',
   port: process.env.REDIS_PORT || 6379,
