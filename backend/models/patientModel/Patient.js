@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
 
 const patientSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  isVerified: { type: Boolean, default: false },
   bloodGroup: { type: String },
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
@@ -12,20 +11,18 @@ const patientSchema = new mongoose.Schema({
       type: [Number], 
       default: undefined,
        
-    }, // [longitude, latitude]
+    }, 
   },
-  emergencyContact: String,
+  // emergencyContact: String,
+  mobile: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   medicalRecords: String, // URL or filename
 }, { timestamps: true });
 
-patientSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
-  this.password = await bcrypt.hash(this.password, 10);
-});
 
-patientSchema.methods.comparePassword = function (password) {
-  return bcrypt.compare(password, this.password);
-};
 
 patientSchema.index({ location: '2dsphere' });
 
