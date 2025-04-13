@@ -16,4 +16,4 @@ const bloodBankSchema = new mongoose.Schema({
   isApproved: { type: Boolean, default: false },
 });
 
-module.exports = mongoose.model("BloodBank", bloodBankSchema);
+module.exports = mongoose.models.BloodBank || mongoose.model("BloodBank", bloodBankSchema);
