@@ -1,5 +1,5 @@
 const Order = require('../../models/patientModel/Order');
-const Inventory = require('../../models/bloodBankModel/Inventory');
+const Inventory = require('../../models/BloodBankModel/Inventory');
 const handlingChargeMap = require('../../config/handlingCharges');
 const { createNotification } = require('../../controllers/NotificationController/notificationController');
 
