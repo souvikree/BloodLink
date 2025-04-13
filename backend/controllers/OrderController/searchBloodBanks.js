@@ -1,6 +1,6 @@
 // controllers/PatientController.js
 
-const Inventory = require('../../models/bloodBankModel/Inventory');
+const Inventory = require('../../models/BloodBankModel/Inventory');
 
 const searchBloodBanks = async (req, res) => {
   try {

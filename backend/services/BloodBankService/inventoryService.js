@@ -1,4 +1,4 @@
-const Inventory = require("../../models/bloodBankModel/Inventory");
+const Inventory = require("../../models/BloodBankModel/Inventory");
 
 exports.updateInventory = async (bloodBankId, updates) => {
   for (let item of updates) {

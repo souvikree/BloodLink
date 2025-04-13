@@ -3,8 +3,8 @@ const { generateToken } = require('../../utils/jwt');
 const redis = require('../../utils/redisClient');
 const sendOtp = require('../../utils/twilio');
 const { getCoordinates } = require('../../utils/geocode');
-const BloodBank = require('../../models/bloodBankModel/BloodBank');
-const Inventory = require('../../models/bloodBankModel/Inventory');
+const BloodBank = require('../../models/BloodBankModel/BloodBank');
+const Inventory = require('../../models/BloodBankModel/Inventory');
 
 const RESEND_COOLDOWN = 60; // seconds
 

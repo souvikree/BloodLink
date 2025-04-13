@@ -6,9 +6,9 @@ const axios = require("axios");
 const xlsx = require("xlsx");
 const fs = require("fs");
 
-const BloodBank = require("../../models/bloodBankModel/BloodBank");
+const BloodBank = require("../../models/BloodBankModel/BloodBank");
 const Order = require("../../models/patientModel/Order");
-const Inventory = require("../../models/bloodBankModel/Inventory");
+const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
 const { updateInventory, getInventoryStats } = require("../../services/BloodBankService/inventoryService");
 // const { getOrdersByBank } = require("../../services/OrderService/orderService");
