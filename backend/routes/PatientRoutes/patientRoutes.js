@@ -7,7 +7,7 @@ const {
   loginVerifyOtp,
   getProfile,
   updateProfile,
-  searchNearby,
+  smartSearchBloodBanks,
 } = require('../../controllers/PatientController/patientController.js');
 
 // const { sendOtpToMobile, verifyOtp } = require('../../controllers/PatientController/otpController.js');
@@ -35,7 +35,7 @@ router.post('/login/verify-otp', loginVerifyOtp);
 
 router.get('/profile', protect, getProfile);
 
-router.get('/search', protect, searchNearby);
+router.get('/search', protect, smartSearchBloodBanks);
 router.get('/search-banks', searchBloodBanks);
 router.post('/place-order', protect, uploadPrescription.single('prescription'), placeOrder);
 router.get('/orders/history', protect, getOrderHistory);

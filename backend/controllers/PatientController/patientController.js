@@ -3,6 +3,8 @@ const { generateToken } = require('../../utils/jwt');
 const redis = require('../../utils/redisClient');
 const sendOtp = require('../../utils/twilio');
 const { getCoordinates } = require('../../utils/geocode');
+const BloodBank = require('../../models/bloodBankModel/BloodBank');
+const Inventory = require('../../models/bloodBankModel/Inventory');
 
 const RESEND_COOLDOWN = 60; // seconds
 
@@ -194,27 +196,71 @@ const getProfile = async (req, res) => {
 
 //SEARCH NEARBY 7KM RADIUS
 
-const searchNearby = async (req, res) => {
-    const { bloodGroup, lng, lat } = req.query;
-  
-    const radiusInMeters = 7000;
-  
-    const bloodBanks = await BloodBank.find({
-      bloodGroupAvailable: bloodGroup,
-      location: {
-        $nearSphere: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [lng, lat],
-          },
-          $maxDistance: radiusInMeters,
-        },
-      },
+const MAX_RADIUS = 15000; // 15 km in meters
+const INITIAL_RADIUS = 7000; // 7 km in meters
+const RADIUS_INCREMENT = 3000; // 3 km increment
+
+const smartSearchBloodBanks = async (req, res) => {
+  try {
+    const { bloodGroup, latitude, longitude } = req.query;
+
+    if (!bloodGroup || !latitude || !longitude) {
+      return res.status(400).json({ message: "bloodGroup, latitude, and longitude are required." });
+    }
+
+    let radius = INITIAL_RADIUS;
+    let matchingBloodBankIds = [];
+    let bloodBanks = [];
+
+    while (radius <= MAX_RADIUS) {
+      const nearbyBloodBanks = await BloodBank.find({
+        location: {
+          $near: {
+            $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+            $maxDistance: radius,
+          }
+        }
+      });
+
+      if (!nearbyBloodBanks.length) {
+        radius += RADIUS_INCREMENT;
+        continue;
+      }
+
+      const bloodBankIds = nearbyBloodBanks.map(bank => bank._id);
+
+      // Get blood banks with this blood group in inventory and > 0 quantity
+      bloodBanks = await Inventory.find({
+        bloodGroup,
+        quantity: { $gt: 0 },
+        bloodBankId: { $in: bloodBankIds }
+      })
+        .populate("bloodBankId", "name address contactNumber location")
+        .sort({ quantity: -1 }); // Prioritize more stock
+
+      if (bloodBanks.length > 0) break;
+
+      radius += RADIUS_INCREMENT;
+    }
+
+    if (!bloodBanks.length) {
+      return res.status(404).json({ message: "No blood banks found within the available radius." });
+    }
+
+    res.status(200).json({
+      nearbyBloodBanks: bloodBanks,
+      radiusUsed: radius / 1000 + " km"
     });
-  
-    res.json({ bloodBanks });
-  };
-  
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = {
+  smartSearchBloodBanks
+};
 
 
 module.exports = {
@@ -225,5 +271,5 @@ module.exports = {
     loginVerifyOtp,
     getProfile,
     updateProfile,
-    searchNearby,
+    smartSearchBloodBanks,
   };
