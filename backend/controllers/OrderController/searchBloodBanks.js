@@ -4,11 +4,13 @@ const Inventory = require('../../models/BloodBankModel/Inventory');
 
 const searchBloodBanks = async (req, res) => {
   try {
-    const { bloodGroup } = req.query;
+    let { bloodGroup } = req.query;
 
     if (!bloodGroup) {
       return res.status(400).json({ message: "Blood group is required" });
     }
+
+    bloodGroup = bloodGroup.replace(" ", "+");
 
     const banks = await Inventory.find({
       bloodGroup,

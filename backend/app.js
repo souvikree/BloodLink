@@ -49,7 +49,6 @@ app.use('/api/bloodbanks', bloodBanksRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Health check route
 app.get('/', (req, res) => {
     res.status(200).json({ message: "BloodLink Backend API is running!" });
 });
