@@ -54,8 +54,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
-        ..fields['bloodBankId'] = _selectedBloodBank!['bloodBankId']['_id'] ?? ''
-        ..fields['bloodGroup'] = _selectedBloodGroup ?? ''
+        ..fields['bloodBank'] = _selectedBloodBank!['bloodBankId']['_id'] ?? ''
+        ..fields['bloodType'] = _selectedBloodGroup ?? ''
         ..fields['quantity'] = _quantityController.text.trim()
         ..fields['deliveryAddress'] = _addressController.text.trim();
 
@@ -65,8 +65,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200) {
+      print('response code ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode==201) {
         Navigator.pop(context, true); // Success
       } else {
         setState(() => errorMessage = 'Failed to place order');

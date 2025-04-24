@@ -66,7 +66,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         },
         body: jsonEncode(body),
       );
-
+      print('response code profile ${response.statusCode}');
       if (response.statusCode == 200) {
         Navigator.pop(context, true);
       } else {
