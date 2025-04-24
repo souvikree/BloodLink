@@ -109,13 +109,9 @@ BloodLink leverages **Flutter**, a powerful UI toolkit, to ensure a consistent a
 |:--:|:--:|:--:|
 | ![](https://github.com/user-attachments/assets/9603e207-51b9-44e1-aaf8-1201c56902ac) | ![](https://github.com/user-attachments/assets/df5d48f0-c6c6-472d-89d4-3071ba533141) | ![](https://github.com/user-attachments/assets/528c0429-a8b9-4d2b-a73b-7811c336e894) |
 
-| Place Order | Search Bank | Map View |
+| Place Order | Place Order Filled | Profile |
 |:--:|:--:|:--:|
 | ![](https://github.com/user-attachments/assets/ccdccb61-4a60-4d0a-9780-4be31000e984) | ![](https://github.com/user-attachments/assets/9ea7da84-1ac6-4d66-a9b4-bb8357b866c3) | ![](https://github.com/user-attachments/assets/fa1f62a9-bf15-4b5a-8219-6a4d927b3f37) |
-
-| Loading State |
-|:--:|
-| ![](https://github.com/user-attachments/assets/3fb20c6d-00da-4eda-b16d-5ad5fc53ad5a) |
 
 ---
 
