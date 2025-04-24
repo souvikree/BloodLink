@@ -101,7 +101,7 @@ BloodLink leverages **Flutter**, a powerful UI toolkit, to ensure a consistent a
 
 ## 📸 Screenshots
 
-| Login | OTP Verification | Signup |
+| Login | Signup | OTP Verification |
 |:--:|:--:|:--:|
 | ![](https://github.com/user-attachments/assets/44d270b9-441e-4f6e-8e63-673c35a68ebc) | ![](https://github.com/user-attachments/assets/01484266-bc2e-4a75-9052-25b791f48ab8) | ![](https://github.com/user-attachments/assets/d4cc222a-efac-48f5-bdc8-2749747e8aa7) |
 
