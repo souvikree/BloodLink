@@ -36,7 +36,7 @@ const placeOrder = async (req, res) => {
 
     // Create the order
     const order = await Order.create({
-      patient: req.user._id,
+      patient: req.user.id,
       bloodBank,
       bloodType,
       quantity: units,
