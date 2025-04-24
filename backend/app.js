@@ -10,11 +10,11 @@ const setupSocket = require('./config/socket');
 
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const bloodBankRoutes = require('./routes/bloodBankRoutes');
-const donorRoutes = require('./routes/donorRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+// const authRoutes = require('./routes/authRoutes');
+// const userRoutes = require('./routes/userRoutes');
+// const bloodBankRoutes = require('./routes/bloodBankRoutes');
+// const donorRoutes = require('./routes/donorRoutes');
+// const orderRoutes = require('./routes/orderRoutes');
 // const adminRoutes = require('./routes/adminRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
 
