@@ -84,7 +84,69 @@ const getOrderHistory = async (req, res) => {
   }
 };
 
+
+const cancelOrder = async (req, res) => {
+  const { orderId } = req.params;
+  const userId = req.user._id;
+  const io = req.app.get('io');
+
+  try {
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    // Authorization: Only the patient who placed the order can cancel
+    if (!order.patient.equals(userId)) {
+      return res.status(403).json({ message: 'Unauthorized to cancel this order' });
+    }
+
+    // Allow cancellation only if the order is pending or accepted
+    if (!['pending', 'accepted'].includes(order.status)) {
+      return res.status(400).json({ message: `Cannot cancel an order that is already ${order.status}` });
+    }
+
+    // Use atomic update to avoid race condition
+    const updatedOrder = await Order.findOneAndUpdate(
+      {
+        _id: orderId,
+        status: { $in: ['pending', 'accepted'] } // extra safety
+      },
+      {
+        status: 'cancelled'
+      },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(409).json({ message: 'Order could not be cancelled (maybe already processed)' });
+    }
+
+    // ✅ Restore inventory if already deducted
+    const inventory = await Inventory.findOne({
+      bloodBankId: order.bloodBank,
+      bloodGroup: order.bloodType
+    });
+
+    if (inventory) {
+      inventory.quantity += order.quantity; // restore stock
+      await inventory.save();
+    }
+
+    // ✅ Send notifications
+    await createNotification(order.patient, 'Patient', `Your order for ${order.bloodType} blood was cancelled.`, io);
+    await createNotification(order.bloodBank, 'BloodBank', `A patient cancelled their ${order.bloodType} order.`, io);
+
+    res.status(200).json({ message: 'Order cancelled successfully', order: updatedOrder });
+
+  } catch (err) {
+    console.error("Error cancelling order:", err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
   placeOrder,
   getOrderHistory,
+  cancelOrder,
 };

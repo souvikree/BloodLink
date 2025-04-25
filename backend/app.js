@@ -9,17 +9,7 @@ require('dotenv').config();
 const setupSocket = require('./config/socket');
 
 
-// Import routes
-// const authRoutes = require('./routes/authRoutes');
-// const userRoutes = require('./routes/userRoutes');
-// const bloodBankRoutes = require('./routes/bloodBankRoutes');
-// const donorRoutes = require('./routes/donorRoutes');
-// const orderRoutes = require('./routes/orderRoutes');
-// const adminRoutes = require('./routes/adminRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
-
-
-
 const patientRoutes = require('./routes/PatientRoutes/patientRoutes');
 const bloodBanksRoutes = require('./routes/BloodBankRoutes/bloodBanksRoutes');
 const adminRoutes = require('./routes/AdminRoutes/adminRoutes');
@@ -68,3 +58,10 @@ module.exports = app;
 // app.use('/api/donors', donorRoutes);
 // app.use('/api/orders', orderRoutes);
 // app.use('/api/admins', adminRoutes);
+// Import routes
+// const authRoutes = require('./routes/authRoutes');
+// const userRoutes = require('./routes/userRoutes');
+// const bloodBankRoutes = require('./routes/bloodBankRoutes');
+// const donorRoutes = require('./routes/donorRoutes');
+// const orderRoutes = require('./routes/orderRoutes');
+// const adminRoutes = require('./routes/adminRoutes');
