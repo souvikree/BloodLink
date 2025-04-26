@@ -134,15 +134,15 @@ class OrderDetailsPage extends StatelessWidget {
                       _buildPrescriptionRow(
                         context: context,
                         icon: Icons.description,
-                        label: 'License Document',
-                        prescription: order['bloodBank']?['licenseDocumentUrl'],
+                        label: 'Prescription Document',
+                        prescription: order['prescriptionUrl'],
                       ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              // Cancel Order Button
+              if(order['status']!='cancelled')
               Container(
                 margin: const EdgeInsets.only(top: 16, bottom: 16),
                 decoration: BoxDecoration(
@@ -314,7 +314,7 @@ class OrderDetailsPage extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => FullScreenImageDialog(
-                  imagePath: prescription!,
+                  imagePath: prescription,
                 ),
               );
             },
@@ -338,7 +338,6 @@ class OrderDetailsPage extends StatelessWidget {
   }
 
   Widget _buildPrescriptionImage(String prescription) {
-    if (prescription.startsWith('http')) {
       return Image.network(
         prescription,
         fit: BoxFit.cover,
@@ -352,21 +351,7 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
       );
-    } else {
-      return Image.file(
-        File(prescription),
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[200],
-          child: const Icon(
-            Icons.broken_image,
-            size: 50,
-            color: Colors.grey,
-          ),
-        ),
-      );
-    }
+
   }
 }
 
@@ -396,13 +381,14 @@ Future<void> cancelOrder(String orderId, BuildContext context) async {
       return;
     }
 
-    final response = await http.post(
-      Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/orders/:$orderId/cancel'),
+    final response = await http.put(
+      Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/orders/${orderId}/cancel'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
+    print('Cancel statue code : ${response}');
 
     Navigator.pop(context); // Close loading dialog first
 

@@ -101,11 +101,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                     return RequestItem(
                       bloodBankId: appointment['bloodBank']?['name'] ??
                           'Unknown Blood Bank',
-                      bloodGroup: appointment['bloodGroup'] ?? 'Unknown Group',
+                      bloodGroup: appointment['bloodType'] ?? 'Unknown Group',
                       quantity: appointment['quantity']?.toString() ?? '0',
                       order: appointment,
-                      orderDetailsPage: () {
-                       bool result = Navigator.push(
+                      orderDetailsPage: () async {
+                       bool result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
