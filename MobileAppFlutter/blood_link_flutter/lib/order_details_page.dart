@@ -1,15 +1,18 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderDetailsPage extends StatelessWidget {
-  final Map<String, String?> order;
+  final Map<String, dynamic> order;
 
   const OrderDetailsPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Soft grey for healthcare
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text(
           'Order Details',
@@ -25,7 +28,7 @@ class OrderDetailsPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Color(0xFFD32F2F), // Red accent
+            color: Color(0xFFD32F2F),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -37,135 +40,160 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: Card(
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFFD32F2F).withOpacity(0.3),
+                    ),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: const Color(0xFFD32F2F).withOpacity(0.3),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header
+                      const Text(
+                        'Order Information',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF212121),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(15),
+                      Container(
+                        margin: const EdgeInsets.only(top: 8, bottom: 16),
+                        height: 3,
+                        width: 60,
+                        color: const Color(0xFFD32F2F),
+                      ),
+                      // Order ID
+                      _buildDetailRow(
+                        icon: Icons.assignment,
+                        label: 'Order ID',
+                        value: order['_id'] ?? 'N/A',
+                      ),
+                      const SizedBox(height: 16),
+                      // Patient ID
+                      _buildDetailRow(
+                        icon: Icons.person,
+                        label: 'Patient ID',
+                        value: order['patient'] ?? 'N/A',
+                      ),
+                      const SizedBox(height: 16),
+                      // Blood Bank Name
+                      _buildDetailRow(
+                        icon: Icons.local_hospital,
+                        label: 'Blood Bank Name',
+                        value: order['bloodBank']?['name'] ?? 'N/A',
+                      ),
+                      const SizedBox(height: 16),
+                      // Blood Bank Address
+                      _buildDetailRow(
+                        icon: Icons.location_on,
+                        label: 'Blood Bank Address',
+                        value: order['bloodBank']?['address'] ?? 'N/A',
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () async {
+                          final String? contactNumber =
+                          order['bloodBank']?['contactNumber']?.toString();
+                          if (contactNumber != null && contactNumber.isNotEmpty) {
+                            await FlutterPhoneDirectCaller.callNumber(contactNumber);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Contact number is not available.'),
+                              ),
+                            );
+                          }
+                        },
+                        child: _buildDetailRow(
+                          icon: Icons.phone,
+                          label: 'Contact Number',
+                          value: order['bloodBank']?['contactNumber']?.toString() ??
+                              'N/A',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // License Document URL
+                      _buildPrescriptionRow(
+                        context: context,
+                        icon: Icons.description,
+                        label: 'License Document',
+                        prescription: order['bloodBank']?['licenseDocumentUrl'],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Cancel Order Button
+              Container(
+                margin: const EdgeInsets.only(top: 16, bottom: 16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD32F2F).withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header
-                        const Text(
-                          'Order Information',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF212121),
-                          ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final orderId = order['_id'];
+                    if (orderId != null) {
+                      await cancelOrder(orderId,context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Order ID is not available.'),
                         ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 16),
-                          height: 3,
-                          width: 60,
-                          color: const Color(0xFFD32F2F), // Red underline
-                        ),
-                        // Blood Group
-                        _buildDetailRow(
-                          icon: Icons.water_drop,
-                          label: 'Blood Type',
-                          value: order['bloodGroup'] ?? 'N/A',
-                        ),
-                        const SizedBox(height: 16),
-                        // Quantity
-                        _buildDetailRow(
-                          icon: Icons.format_list_numbered,
-                          label: 'Quantity',
-                          value: '${order['quantity'] ?? 'N/A'} Units',
-                        ),
-                        const SizedBox(height: 16),
-                        // Blood Bank ID
-                        _buildDetailRow(
-                          icon: Icons.local_hospital,
-                          label: 'Blood Bank ID',
-                          value: order['bloodBankId'] ?? 'N/A',
-                        ),
-                        const SizedBox(height: 16),
-                        // Delivery Address
-                        _buildDetailRow(
-                          icon: Icons.location_on,
-                          label: 'Delivery Address',
-                          value: order['deliveryAddress'] ?? 'N/A',
-                          maxLines: 2,
-                        ),
-                        const SizedBox(height: 16),
-                        // Prescription
-                        _buildPrescriptionRow(
-                          context: context,
-                          icon: Icons.description,
-                          label: 'Prescription',
-                          prescription: order['prescription'],
-                        ),
-                      ],
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text(
+                    'Cancel Order',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-            ),
-            // Cancel Order Button
-            Container(
-              margin: const EdgeInsets.only(top: 16, bottom: 16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)], // Red gradient
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD32F2F).withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Order cancellation requested for Blood Bank ID: ${order['bloodBankId'] ?? 'N/A'}'),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text(
-                  'Cancel Order',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -206,15 +234,18 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
+              Tooltip(
+                message: value,
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF212121),
+                  ),
+                  maxLines: maxLines,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: maxLines,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -263,8 +294,8 @@ class OrderDetailsPage extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     prescription?.isNotEmpty == true
-                        ? 'Prescription Image'
-                        : 'No prescription provided',
+                        ? 'View Document'
+                        : 'No document provided',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -307,7 +338,6 @@ class OrderDetailsPage extends StatelessWidget {
   }
 
   Widget _buildPrescriptionImage(String prescription) {
-    // Check if the prescription is a local file path or a URL
     if (prescription.startsWith('http')) {
       return Image.network(
         prescription,
@@ -339,6 +369,60 @@ class OrderDetailsPage extends StatelessWidget {
     }
   }
 }
+
+Future<void> cancelOrder(String orderId, BuildContext context) async {
+  try {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text('Cancelling Order...'),
+          ],
+        ),
+      ),
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('authToken');
+
+    if (token == null) {
+      debugPrint('No token found');
+      Navigator.pop(context); // Close loading dialog
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/orders/:$orderId/cancel'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    Navigator.pop(context); // Close loading dialog first
+
+    if (response.statusCode == 200) {
+      Navigator.pop(context, true); // Go back and pass true
+    } else {
+      debugPrint('Failed to cancel order: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to cancel order. Please try again.')),
+      );
+    }
+  } catch (e) {
+    Navigator.pop(context); // Close loading dialog on error
+    debugPrint('Exception during cancel order: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Something went wrong. Please try again.')),
+    );
+  }
+}
+
 
 class FullScreenImageDialog extends StatelessWidget {
   final String imagePath;

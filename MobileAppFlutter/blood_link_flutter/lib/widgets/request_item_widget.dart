@@ -2,7 +2,8 @@ import 'package:blood_link_flutter/order_details_page.dart';
 import 'package:flutter/material.dart';
 
 class RequestItem extends StatelessWidget {
-  final Map<String, String?> order;
+  final Map<String, dynamic> order;
+  final Function() orderDetailsPage;
 
   final String bloodGroup;
   final String quantity;
@@ -13,6 +14,7 @@ class RequestItem extends StatelessWidget {
     required this.bloodGroup,
     required this.quantity,
     required this.bloodBankId, required this.order,
+    required this.orderDetailsPage,
   });
 
   @override
@@ -83,7 +85,7 @@ class RequestItem extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Blood Bank ID: $bloodBankId',
+                        'Blood Bank: $bloodBankId',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -111,9 +113,8 @@ class RequestItem extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
-                     Navigator.push(context, MaterialPageRoute(builder: (context)=>OrderDetailsPage(order: order)));
-                    },
+                    onPressed: orderDetailsPage
+                    ,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
