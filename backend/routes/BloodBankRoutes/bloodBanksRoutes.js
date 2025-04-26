@@ -41,6 +41,8 @@ router.post("/inventory/bulk-upload", uploadExcel.single("file"), async (req, re
     }
   });
 
+router.get("/inventory/summary", controller.getInventorySummary);
+router.get("/inventory/details", controller.getInventoryDetails);
   
 router.post("/inventory/:inventoryId", controller.updateInventory);
 router.get("/inventory", controller.getInventory);

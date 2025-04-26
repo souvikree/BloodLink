@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
+
 
 const axios = require("axios");
 
@@ -82,39 +84,35 @@ exports.updateProfile = async (req, res) => {
 
 exports.addInventory = async (req, res) => {
   try {
-    const { bloodGroup, quantity } = req.body;
+    const { bloodGroup, quantity, donorId, expiryDate } = req.body;
     const bloodBankId = req.user.id;
 
-    // Check if this blood group is already added for this blood bank
-    const existing = await Inventory.findOne({ bloodBankId, bloodGroup });
+    if (!expiryDate) {
+      return res.status(400).json({ error: "Expiry date is required." });
+    }
 
-    if (existing) {
-      // Update the quantity by adding the new quantity
-      existing.quantity += quantity;
-      await existing.save();
+    const entries = [];
 
-      return res.status(200).json({
-        message: "Existing inventory updated successfully.",
-        inventory: existing,
+    // Insert multiple inventory units (1 unit per document)
+    for (let i = 0; i < quantity; i++) {
+      entries.push({
+        bloodBankId,
+        bloodGroup,
+        quantity: 1,
+        donorId,
+        expiryDate,
       });
     }
 
-    // Create a new inventory entry
-    const inventory = new Inventory({
-      bloodGroup,
-      quantity,
-      bloodBankId,
-    });
-
-    await inventory.save();
+    const saved = await Inventory.insertMany(entries);
 
     res.status(201).json({
-      message: "New inventory added successfully.",
-      inventory,
+      message: `${saved.length} inventory units added successfully.`,
+      inventory: saved,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error while updating inventory." });
+    res.status(500).json({ error: "Server error while adding inventory." });
   }
 };
 
@@ -124,12 +122,11 @@ exports.addInventory = async (req, res) => {
 //======================
 exports.bulkUploadInventory = async (req, res) => {
   try {
-    const fileUrl = req.file?.path; // Cloudinary URL
+    const fileUrl = req.file?.path;
     if (!fileUrl) {
       return res.status(400).json({ error: "File upload failed." });
     }
 
-    // Download the file from Cloudinary
     const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
     const workbook = xlsx.read(response.data, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -138,13 +135,14 @@ exports.bulkUploadInventory = async (req, res) => {
     const bloodBankId = req.user.id;
     const validBloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
     const errors = [];
-    let inserted = 0;
-    let updated = 0;
+    const entries = [];
 
     for (let i = 0; i < data.length; i++) {
-      const { bloodGroup, quantity } = data[i];
+      let { bloodGroup, quantity, expiryDate, donorId } = data[i];
 
-      if (!bloodGroup || quantity == null) {
+      bloodGroup = bloodGroup?.trim(); // ✅ TRIM extra spaces
+
+      if (!bloodGroup || quantity == null || !expiryDate) {
         errors.push({ row: i + 2, error: "Missing required fields" });
         continue;
       }
@@ -154,26 +152,30 @@ exports.bulkUploadInventory = async (req, res) => {
         continue;
       }
 
-      const existing = await Inventory.findOne({ bloodBankId, bloodGroup });
-
-      if (existing) {
-        existing.quantity += Number(quantity);
-        await existing.save();
-        updated++;
-      } else {
-        await Inventory.create({
-          bloodGroup,
-          quantity: Number(quantity),
-          bloodBankId,
-        });
-        inserted++;
+      quantity = Number(quantity); // ✅ Ensure quantity is a number
+      if (isNaN(quantity) || quantity <= 0) {
+        errors.push({ row: i + 2, error: "Invalid quantity" });
+        continue;
       }
+
+      for (let j = 0; j < quantity; j++) {
+        entries.push({
+          bloodBankId,
+          bloodGroup,
+          quantity: 1,
+          donorId: donorId || null,
+          expiryDate,
+        });
+      }
+    }
+
+    if (entries.length > 0) {
+      await Inventory.insertMany(entries);
     }
 
     res.status(200).json({
       message: "Bulk upload completed",
-      inserted,
-      updated,
+      inserted: entries.length,
       errors,
     });
   } catch (err) {
@@ -181,6 +183,54 @@ exports.bulkUploadInventory = async (req, res) => {
     res.status(500).json({ error: "Server error during upload" });
   }
 };
+
+
+
+exports.getInventorySummary = async (req, res) => {
+  try {
+    const bloodBankId = req.user.id;
+    const inventory = await Inventory.aggregate([
+      { $match: { bloodBankId: new mongoose.Types.ObjectId(bloodBankId), status: 'available' } },
+      {
+        $group: {
+          _id: '$bloodGroup',
+          totalUnits: { $sum: 1 },
+          nearestExpiry: { $min: '$expiryDate' }
+        }
+      },
+      { $sort: { nearestExpiry: 1 } }
+    ]);
+
+    res.status(200).json(inventory);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while fetching inventory." });
+  }
+};
+
+
+exports.getInventoryDetails = async (req, res) => {
+  try {
+    const bloodBankId = req.user.id;
+    let { bloodGroup } = req.query;
+
+    const filter = { bloodBankId, status: 'available' };
+
+    if (bloodGroup) {
+      bloodGroup = bloodGroup.replace(/ /g, "+"); // Convert spaces back to +
+      filter.bloodGroup = bloodGroup;
+    }
+
+    const inventory = await Inventory.find(filter).sort({ expiryDate: 1 });
+
+    res.status(200).json(inventory);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while fetching details." });
+  }
+};
+
+
 
 
 exports.uploadLicense = async (req, res) => {
