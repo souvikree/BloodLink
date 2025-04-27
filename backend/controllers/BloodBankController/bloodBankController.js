@@ -91,21 +91,32 @@ exports.addInventory = async (req, res) => {
       return res.status(400).json({ error: "Expiry date is required." });
     }
 
-    const entries = [];
+    const expiry = new Date(expiryDate);
+    if (isNaN(expiry.getTime())) {
+      return res.status(400).json({ error: "Invalid expiry date format." });
+    }
 
-    // Insert multiple inventory units (1 unit per document)
+    let expiredAt = null;
+    const now = new Date();
+    if (expiry < now) {
+      expiredAt = now; // Automatically set expiredAt if the item is expired
+    } else {
+      expiredAt = expiry; // Set expiredAt to expiryDate if the item is not expired yet
+    }
+
+    const entries = [];
     for (let i = 0; i < quantity; i++) {
       entries.push({
         bloodBankId,
         bloodGroup,
         quantity: 1,
-        donorId,
-        expiryDate,
+        donorId: donorId || null,
+        expiryDate: expiry,
+        expiredAt: expiredAt,
       });
     }
 
     const saved = await Inventory.insertMany(entries);
-
     res.status(201).json({
       message: `${saved.length} inventory units added successfully.`,
       inventory: saved,
@@ -115,6 +126,8 @@ exports.addInventory = async (req, res) => {
     res.status(500).json({ error: "Server error while adding inventory." });
   }
 };
+
+
 
 
 //=====================
@@ -158,13 +171,34 @@ exports.bulkUploadInventory = async (req, res) => {
         continue;
       }
 
+      // Convert Excel serial number to date if needed
+      if (typeof expiryDate === 'number') {
+        expiryDate = new Date(Math.round((expiryDate - 25569) * 86400 * 1000)); // Convert Excel date
+      }
+
+      // Now parse the expiryDate string correctly if it's not a number
+      const expiry = new Date(expiryDate);
+      if (isNaN(expiry.getTime())) {
+        errors.push({ row: i + 2, error: "Invalid expiry date format" });
+        continue;
+      }
+
+      let expiredAt = null;
+      const now = new Date();
+      if (expiry < now) {
+        expiredAt = now; // Automatically set expiredAt if the item is expired
+      } else {
+        expiredAt = expiry; // Set expiredAt to expiryDate if the item is not expired yet
+      }
+
       for (let j = 0; j < quantity; j++) {
         entries.push({
           bloodBankId,
           bloodGroup,
           quantity: 1,
           donorId: donorId || null,
-          expiryDate,
+          expiryDate: expiry,
+          expiredAt: expiredAt,
         });
       }
     }
