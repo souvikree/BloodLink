@@ -55,10 +55,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final body = {
         "bloodGroup": _selectedBloodGroup,
         "address": _addressController.text.trim(),
-        "medicalRecords": medicalRecords,
       };
 
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/complete-profile'),
         headers: {
           'Content-Type': 'application/json',
