@@ -21,7 +21,6 @@ router.post("/upload-license", uploadLicense.single("license"), controller.uploa
 
 // Inventory
 router.post("/inventory/add",controller.addInventory);
-// router.post("/inventory/bulk-upload",uploadExcel.single("file"),controller.bulkUploadInventory);
 
 router.post("/inventory/bulk-upload", uploadExcel.single("file"), async (req, res, next) => {
     try {

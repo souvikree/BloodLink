@@ -12,8 +12,7 @@ const BloodBank = require("../../models/BloodBankModel/BloodBank");
 const Order = require("../../models/patientModel/Order");
 const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
-const { updateInventory, getInventoryStats } = require("../../services/BloodBankService/inventoryService");
-// const { getOrdersByBank } = require("../../services/OrderService/orderService");
+const { getInventoryStats } = require("../../services/BloodBankService/inventoryService");
 
 
 exports.register = async (req, res) => {
@@ -153,7 +152,7 @@ exports.bulkUploadInventory = async (req, res) => {
     for (let i = 0; i < data.length; i++) {
       let { bloodGroup, quantity, expiryDate, donorId } = data[i];
 
-      bloodGroup = bloodGroup?.trim(); // ✅ TRIM extra spaces
+      bloodGroup = bloodGroup?.trim(); 
 
       if (!bloodGroup || quantity == null || !expiryDate) {
         errors.push({ row: i + 2, error: "Missing required fields" });
