@@ -44,5 +44,3 @@ router.get('/orders/history', protect, getOrderHistory);
 
 module.exports = router;
 
-// router.post('/add-address', protect, addAddressAfterRegistration);
-// router.put('/profile', protect, updateProfile);
