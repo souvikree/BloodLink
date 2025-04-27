@@ -11,6 +11,10 @@ const inventorySchema = new mongoose.Schema({
   donorId: { type: mongoose.Schema.Types.ObjectId, ref: "Donor" }, // New field
   expiryDate: { type: Date, required: true }, // New field
   status: { type: String, enum: ["available", "reserved", "expired"], default: "available" },
+  expiredAt: { type: Date, default: null }, 
 }, { timestamps: true });
+
+// Add TTL index on expiredAt
+inventorySchema.index({ expiredAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("Inventory", inventorySchema);
