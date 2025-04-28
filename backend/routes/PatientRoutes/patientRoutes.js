@@ -15,6 +15,7 @@ const {
   placeOrder,
   getOrderHistory,
   cancelOrder,
+  getCharges,
 } = require('../../controllers/OrderController/orderController.js');
 const {
   searchBloodBanks
@@ -38,6 +39,8 @@ router.get('/profile', protect, getProfile);
 
 router.get('/search', protect, smartSearchBloodBanks);
 router.get('/search-banks', searchBloodBanks);
+
+router.get('/charges/:bloodType', protect, getCharges);
 router.post('/place-order', protect, uploadPrescription.single('prescription'), placeOrder);
 router.put('/orders/:orderId/cancel', protect, cancelOrder);
 router.get('/orders/history', protect, getOrderHistory);
