@@ -194,11 +194,35 @@ const getProfile = async (req, res) => {
   };
   
 
-//SEARCH NEARBY 7KM RADIUS
+//=====================
+//*COMPATIBILITY BLOOD GROUPS LOGIC*//
+//======================
 
-const MAX_RADIUS = 15000; // 15 km in meters
-const INITIAL_RADIUS = 7000; // 7 km in meters
-const RADIUS_INCREMENT = 3000; // 3 km increment
+  const bloodCompatibility = {
+    "O-": ["O-"],
+    "O+": ["O-", "O+"],
+    "A-": ["O-", "A-"],
+    "A+": ["O-", "O+", "A-", "A+"],
+    "B-": ["O-", "B-"],
+    "B+": ["O-", "O+", "B-", "B+"],
+    "AB-": ["O-", "A-", "B-", "AB-"],
+    "AB+": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"],
+  };
+  
+  function getCompatibleBloodGroups(bloodGroup) {
+    if (!bloodCompatibility[bloodGroup]) {
+      throw new Error("Invalid blood group");
+    }
+    return bloodCompatibility[bloodGroup] || [];
+  }
+  
+//=====================
+//*BLOOD BANK SEARCH LOGIC*//
+//=====================
+
+const INITIAL_RADIUS = 3000;  // in meters
+const MAX_RADIUS = 10000;    // in meters
+const RADIUS_INCREMENT = 1000;
 
 const smartSearchBloodBanks = async (req, res) => {
   try {
@@ -209,10 +233,11 @@ const smartSearchBloodBanks = async (req, res) => {
     }
 
     let radius = INITIAL_RADIUS;
-    let matchingBloodBankIds = [];
+    let resultFound = false;
     let bloodBanks = [];
 
-    while (radius <= MAX_RADIUS) {
+    // Loop for radius-based search
+    while (radius <= MAX_RADIUS && !resultFound) {
       const nearbyBloodBanks = await BloodBank.find({
         location: {
           $near: {
@@ -220,37 +245,51 @@ const smartSearchBloodBanks = async (req, res) => {
             $maxDistance: radius,
           }
         }
-      });
+      }).limit(10);
 
-      if (!nearbyBloodBanks.length) {
-        radius += RADIUS_INCREMENT;
-        continue;
-      }
+      if (nearbyBloodBanks.length) {
+        const bloodBankIds = nearbyBloodBanks.map(bank => bank._id);
 
-      const bloodBankIds = nearbyBloodBanks.map(bank => bank._id);
-
-      // Get blood banks with this blood group in inventory and > 0 quantity
-      bloodBanks = await Inventory.find({
-        bloodGroup,
-        quantity: { $gt: 0 },
-        bloodBankId: { $in: bloodBankIds }
-      })
+        const compatibleBloodGroups = getCompatibleBloodGroups(bloodGroup);
+        bloodBanks = await Inventory.find({
+          bloodGroup: { $in: compatibleBloodGroups },
+          quantity: { $gt: 0 },
+          bloodBankId: { $in: bloodBankIds }
+        })
         .populate("bloodBankId", "name address contactNumber location")
-        .sort({ quantity: -1 }); // Prioritize more stock
+        .sort({ quantity: -1 });
 
-      if (bloodBanks.length > 0) break;
-
-      radius += RADIUS_INCREMENT;
+        if (bloodBanks.length > 0) {
+          resultFound = true;
+          return res.status(200).json({
+            nearbyBloodBanks: bloodBanks,
+            radiusUsed: radius / 1000 + " km"
+          });
+        }
+      }
+      radius += RADIUS_INCREMENT;  // Increase radius if no results found
     }
 
+    // Fallback for no blood banks found within the max radius
     if (!bloodBanks.length) {
-      return res.status(404).json({ message: "No blood banks found within the available radius." });
-    }
+      const closestBloodBank = await BloodBank.aggregate([
+        {
+          $geoNear: {
+            near: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+            distanceField: "dist.calculated",
+            maxDistance: MAX_RADIUS,
+            query: { _id: { $in: bloodBankIds } },
+            spherical: true
+          }
+        },
+        { $limit: 1 }
+      ]);
 
-    res.status(200).json({
-      nearbyBloodBanks: bloodBanks,
-      radiusUsed: radius / 1000 + " km"
-    });
+      return res.status(200).json({
+        nearbyBloodBanks: closestBloodBank,
+        radiusUsed: "Beyond 10 km",
+      });
+    }
 
   } catch (error) {
     console.error(error);
@@ -258,9 +297,8 @@ const smartSearchBloodBanks = async (req, res) => {
   }
 };
 
-module.exports = {
-  smartSearchBloodBanks
-};
+
+
 
 
 module.exports = {
