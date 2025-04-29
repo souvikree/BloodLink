@@ -6,6 +6,8 @@ const { getCoordinates } = require('../../utils/geocode');
 const BloodBank = require('../../models/BloodBankModel/BloodBank');
 const Inventory = require('../../models/BloodBankModel/Inventory');
 
+const { validationResult } = require('express-validator');
+
 const RESEND_COOLDOWN = 60; // seconds
 
 const registerPatient = async (req, res) => {
@@ -220,83 +222,131 @@ const getProfile = async (req, res) => {
 //*BLOOD BANK SEARCH LOGIC*//
 //=====================
 
-const INITIAL_RADIUS = 3000;  // in meters
-const MAX_RADIUS = 10000;    // in meters
-const RADIUS_INCREMENT = 1000;
+
+
+const RADIUS_INCREMENT = 3000;
+const INITIAL_RADIUS = 7000;  // Start with 7 km
+const MAX_RADIUS = 10000;     // Extend to 10 km if needed
 
 const smartSearchBloodBanks = async (req, res) => {
   try {
     const { bloodGroup, latitude, longitude } = req.query;
 
-    if (!bloodGroup || !latitude || !longitude) {
-      return res.status(400).json({ message: "bloodGroup, latitude, and longitude are required." });
-    }
+    // Validate blood group
+    const compatibleGroups = getCompatibleBloodGroups(bloodGroup);
 
     let radius = INITIAL_RADIUS;
-    let resultFound = false;
-    let bloodBanks = [];
+    let found = false;
+    let responseData = [];
 
-    // Loop for radius-based search
-    while (radius <= MAX_RADIUS && !resultFound) {
+    while (radius <= MAX_RADIUS && !found) {
+      // Step 1: Find nearby blood banks within radius
       const nearbyBloodBanks = await BloodBank.find({
         location: {
           $near: {
-            $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
+            $geometry: {
+              type: "Point",
+              coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            },
             $maxDistance: radius,
-          }
-        }
-      }).limit(10);
+          },
+        },
+      });
 
-      if (nearbyBloodBanks.length) {
-        const bloodBankIds = nearbyBloodBanks.map(bank => bank._id);
+      if (nearbyBloodBanks.length === 0) {
+        radius += 1000;
+        continue;
+      }
 
-        const compatibleBloodGroups = getCompatibleBloodGroups(bloodGroup);
-        bloodBanks = await Inventory.find({
-          bloodGroup: { $in: compatibleBloodGroups },
-          quantity: { $gt: 0 },
-          bloodBankId: { $in: bloodBankIds }
-        })
+      const nearbyBankIds = nearbyBloodBanks.map((b) => b._id);
+
+      // Step 2: Get inventory with matching blood groups and > 0 quantity
+      const inventories = await Inventory.find({
+        bloodGroup: { $in: compatibleGroups },
+        quantity: { $gt: 0 },
+        bloodBankId: { $in: nearbyBankIds },
+      })
         .populate("bloodBankId", "name address contactNumber location")
         .sort({ quantity: -1 });
 
-        if (bloodBanks.length > 0) {
-          resultFound = true;
-          return res.status(200).json({
-            nearbyBloodBanks: bloodBanks,
-            radiusUsed: radius / 1000 + " km"
+      if (inventories.length > 0) {
+        // Format result: group inventory by blood bank
+        const groupedResults = {};
+
+        inventories.forEach((inv) => {
+          const id = inv.bloodBankId._id;
+          if (!groupedResults[id]) {
+            groupedResults[id] = {
+              _id: id,
+              name: inv.bloodBankId.name,
+              address: inv.bloodBankId.address,
+              contactNumber: inv.bloodBankId.contactNumber,
+              location: inv.bloodBankId.location,
+              availableUnits: 0,
+              bloodGroups: [],
+            };
+          }
+
+          groupedResults[id].availableUnits += inv.quantity;
+          groupedResults[id].bloodGroups.push({
+            bloodGroup: inv.bloodGroup,
+            units: inv.quantity,
           });
-        }
+        });
+
+        responseData = Object.values(groupedResults);
+        found = true;
+
+        return res.status(200).json({
+          success: true,
+          data: responseData,
+          radiusUsed: `${radius / 1000} km`,
+        });
       }
-      radius += RADIUS_INCREMENT;  // Increase radius if no results found
+
+      radius += 1000;
     }
 
-    // Fallback for no blood banks found within the max radius
-    if (!bloodBanks.length) {
-      const closestBloodBank = await BloodBank.aggregate([
-        {
-          $geoNear: {
-            near: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
-            distanceField: "dist.calculated",
-            maxDistance: MAX_RADIUS,
-            query: { _id: { $in: bloodBankIds } },
-            spherical: true
-          }
+    // Step 3: Fallback - nearest blood bank within 10km, even if no inventory
+    const fallback = await BloodBank.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+          },
+          distanceField: "dist.calculated",
+          maxDistance: MAX_RADIUS,
+          spherical: true,
         },
-        { $limit: 1 }
-      ]);
+      },
+      { $limit: 1 },
+    ]);
 
+    if (fallback.length > 0) {
       return res.status(200).json({
-        nearbyBloodBanks: closestBloodBank,
+        success: false,
+        message: "No blood banks with available units found. Showing nearest blood bank.",
+        data: fallback,
         radiusUsed: "Beyond 10 km",
       });
     }
 
+    // Step 4: No blood banks at all found
+    return res.status(404).json({
+      success: false,
+      message: "No blood banks found nearby.",
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Search Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
-
 
 
 
