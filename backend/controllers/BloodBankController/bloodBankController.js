@@ -12,8 +12,7 @@ const BloodBank = require("../../models/BloodBankModel/BloodBank");
 const Order = require("../../models/patientModel/Order");
 const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
-const { updateInventory, getInventoryStats } = require("../../services/BloodBankService/inventoryService");
-// const { getOrdersByBank } = require("../../services/OrderService/orderService");
+const { getInventoryStats } = require("../../services/BloodBankService/inventoryService");
 
 
 exports.register = async (req, res) => {
@@ -25,16 +24,22 @@ exports.register = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    let location = null;
+    if (address) {
+      const coordinates = await getCoordinates(address); // 🗺️ Get lat/lng
+      location = { type: "Point", coordinates };
+    }
+
     const bloodBank = await BloodBank.create({
       name,
       licenseId,
       email,
       password: hashed,
       contactNumber,
-      address,
-      status: "pending", // 🚦 Add this for approval process
-      licenseDocumentUrl: null, // ⛔ To be uploaded after registration
-      // location: { type: "Point", coordinates } // optional if you use geocoding
+      address,   // 📄 Save the text address
+      location,  // 📍 Save the coordinates
+      status: "pending",
+      licenseDocumentUrl: null,
     });
 
     res.status(201).json({
@@ -67,18 +72,28 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { contactNumber, emergencyContact, address } = req.body;
-  let updateData = { contactNumber, emergencyContact };
+  try {
+    const { contactNumber, emergencyContact, address } = req.body;
+    const updateData = {};
 
-  if (address) {
-    const coordinates = await getCoordinates(address);
-    updateData.address = address;
-    updateData.location = { type: "Point", coordinates };
+    if (contactNumber) updateData.contactNumber = contactNumber;
+    if (emergencyContact) updateData.emergencyContact = emergencyContact;
+
+    if (address) {
+      const coordinates = await getCoordinates(address); // 🗺️ Geocode new address
+      updateData.address = address;                       // 📄 Update text address
+      updateData.location = { type: "Point", coordinates }; // 📍 Update geolocation
+    }
+
+    const updatedBloodBank = await BloodBank.findByIdAndUpdate(req.user.id, updateData, { new: true });
+    res.json(updatedBloodBank);
+
+  } catch (err) {
+    console.error("Update Profile Error:", err);
+    res.status(500).json({ msg: "Server error during profile update" });
   }
-
-  const updated = await BloodBank.findByIdAndUpdate(req.user.id, updateData, { new: true });
-  res.json(updated);
 };
+
 
 // Inventory
 
@@ -153,7 +168,7 @@ exports.bulkUploadInventory = async (req, res) => {
     for (let i = 0; i < data.length; i++) {
       let { bloodGroup, quantity, expiryDate, donorId } = data[i];
 
-      bloodGroup = bloodGroup?.trim(); // ✅ TRIM extra spaces
+      bloodGroup = bloodGroup?.trim(); 
 
       if (!bloodGroup || quantity == null || !expiryDate) {
         errors.push({ row: i + 2, error: "Missing required fields" });

@@ -15,6 +15,15 @@ const orderSchema = new mongoose.Schema({
   handlingCharge: { type: Number },
   serviceCharge: { type: Number },
   totalPrice: { type: Number },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid'],
+    default: 'pending'
+  },
+  deliveryLocation: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], default: undefined }, // [longitude, latitude]
+  },
   requestedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 

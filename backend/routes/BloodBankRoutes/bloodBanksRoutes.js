@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../../controllers/BloodBankController/bloodBankController");
+const donorController = require("../../controllers/DonorController/donorController");
 const { verifyToken } = require("../../middleware/BloodBankMiddleware/BloodBankMiddlewares");
 const { requireRole } = require("../../middleware/BloodBankMiddleware/roleMiddleware");
 const { uploadExcel, uploadLicense } = require("../../middleware/BloodBankMiddleware/upload");
@@ -20,7 +21,6 @@ router.post("/upload-license", uploadLicense.single("license"), controller.uploa
 
 // Inventory
 router.post("/inventory/add",controller.addInventory);
-// router.post("/inventory/bulk-upload",uploadExcel.single("file"),controller.bulkUploadInventory);
 
 router.post("/inventory/bulk-upload", uploadExcel.single("file"), async (req, res, next) => {
     try {
@@ -50,6 +50,12 @@ router.get("/inventory", controller.getInventory);
 // Orders
 router.get("/orders", controller.getOrders);
 router.put("/orders/:orderId", controller.updateOrderStatus);
+
+// Donor routes (only BloodBank users can create and delete donors)
+router.post("/donors", donorController.createDonor); // Create a new donor
+router.get("/donors", donorController.getAllDonors); // List all donors
+router.get("/donors/:id", donorController.getDonorById); // Get a single donor by ID
+router.delete("/donors/:id", donorController.deleteDonor);
 
 
 

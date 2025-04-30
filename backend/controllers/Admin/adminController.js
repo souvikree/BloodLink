@@ -28,9 +28,6 @@ exports.login = async (req, res) => {
   }
 };
 
-//
-// ✅ USER MANAGEMENT
-//
 
 // Get all non-admin users (patients, blood banks)
 exports.getAllUsers = async (req, res) => {
