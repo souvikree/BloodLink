@@ -48,6 +48,7 @@ dependencies:
   url_launcher: ^6.3.1
   flutter_phone_direct_caller: ^2.2.1
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
