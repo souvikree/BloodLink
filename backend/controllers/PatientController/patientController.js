@@ -222,15 +222,23 @@ const getProfile = async (req, res) => {
 //*BLOOD BANK SEARCH LOGIC*//
 //=====================
 
-
-
 const RADIUS_INCREMENT = 3000;
 const INITIAL_RADIUS = 7000;  // Start with 7 km
 const MAX_RADIUS = 10000;     // Extend to 10 km if needed
 
+// Helper function to generate Google & Apple Maps direction URLs
+const buildDirectionLinks = (patientLat, patientLng, bankLat, bankLng) => {
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${patientLat},${patientLng}&destination=${bankLat},${bankLng}`;
+  const appleMapsUrl = `http://maps.apple.com/?saddr=${patientLat},${patientLng}&daddr=${bankLat},${bankLng}`;
+  return { googleMapsUrl, appleMapsUrl };
+};
+
 const smartSearchBloodBanks = async (req, res) => {
   try {
     const { bloodGroup, latitude, longitude } = req.query;
+
+    const patientLat = parseFloat(latitude);
+    const patientLng = parseFloat(longitude);
 
     // Validate blood group
     const compatibleGroups = getCompatibleBloodGroups(bloodGroup);
@@ -246,7 +254,7 @@ const smartSearchBloodBanks = async (req, res) => {
           $near: {
             $geometry: {
               type: "Point",
-              coordinates: [parseFloat(longitude), parseFloat(latitude)],
+              coordinates: [patientLng, patientLat],
             },
             $maxDistance: radius,
           },
@@ -254,7 +262,7 @@ const smartSearchBloodBanks = async (req, res) => {
       });
 
       if (nearbyBloodBanks.length === 0) {
-        radius += 1000;
+        radius += RADIUS_INCREMENT;
         continue;
       }
 
@@ -275,6 +283,9 @@ const smartSearchBloodBanks = async (req, res) => {
 
         inventories.forEach((inv) => {
           const id = inv.bloodBankId._id;
+          const bankLat = inv.bloodBankId.location.coordinates[1];
+          const bankLng = inv.bloodBankId.location.coordinates[0];
+
           if (!groupedResults[id]) {
             groupedResults[id] = {
               _id: id,
@@ -284,6 +295,12 @@ const smartSearchBloodBanks = async (req, res) => {
               location: inv.bloodBankId.location,
               availableUnits: 0,
               bloodGroups: [],
+              directionLinks: buildDirectionLinks(
+                patientLat,
+                patientLng,
+                bankLat,
+                bankLng
+              ),
             };
           }
 
@@ -304,7 +321,7 @@ const smartSearchBloodBanks = async (req, res) => {
         });
       }
 
-      radius += 1000;
+      radius += RADIUS_INCREMENT;
     }
 
     // Step 3: Fallback - nearest blood bank within 10km, even if no inventory
@@ -313,7 +330,7 @@ const smartSearchBloodBanks = async (req, res) => {
         $geoNear: {
           near: {
             type: "Point",
-            coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            coordinates: [patientLng, patientLat],
           },
           distanceField: "dist.calculated",
           maxDistance: MAX_RADIUS,
@@ -324,10 +341,17 @@ const smartSearchBloodBanks = async (req, res) => {
     ]);
 
     if (fallback.length > 0) {
+      const fallbackBank = fallback[0];
+      const bankLat = fallbackBank.location.coordinates[1];
+      const bankLng = fallbackBank.location.coordinates[0];
+
       return res.status(200).json({
         success: false,
         message: "No blood banks with available units found. Showing nearest blood bank.",
-        data: fallback,
+        data: [{
+          ...fallbackBank,
+          directionLinks: buildDirectionLinks(patientLat, patientLng, bankLat, bankLng),
+        }],
         radiusUsed: "Beyond 10 km",
       });
     }
