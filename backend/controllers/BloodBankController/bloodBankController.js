@@ -280,8 +280,6 @@ exports.getInventoryDetails = async (req, res) => {
 };
 
 
-
-
 exports.uploadLicense = async (req, res) => {
   try {
     const bloodBankId = req.user.id;
