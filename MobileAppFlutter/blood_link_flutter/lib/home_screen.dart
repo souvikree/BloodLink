@@ -1,65 +1,19 @@
 import 'dart:convert';
-
-import 'package:blood_link_flutter/add_order_screen.dart';
-import 'package:blood_link_flutter/blood_bank_details.dart';
+import 'package:blood_link_flutter/provider/blood_bank_fetch_provider.dart';
 import 'package:blood_link_flutter/search_blood_bank.dart';
+import 'package:blood_link_flutter/widgets/blood_bank_item.dart';
 import 'package:blood_link_flutter/widgets/default_value.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> bloodBanks = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchBloodBanks();
-  }
-
-  Future<void> fetchBloodBanks() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final authDone = prefs.getString('authToken');
-      final response = await http.get(
-        Uri.parse(
-          'https://bloodlink-flsd.onrender.com/api/patients/search-banks?bloodGroup=A%2B',
-        ),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authDone',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        debugPrint('Blood data $data');
-        setState(() {
-          bloodBanks = data;
-          isLoading = false;
-        });
-      } else {
-        throw Exception("Failed to load blood banks");
-      }
-    } catch (e) {
-      debugPrint('Error: $e');
-      setState(() => isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Soft grey background for healthcare
+      backgroundColor: Colors.grey[100],
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -89,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const Icon(
                     Icons.chat_bubble,
-                    color: Color(0xFFD32F2F), // Red accent
+                    color: Color(0xFFDC2626), // Updated red color
                     size: 20,
                   ),
                 ),
@@ -112,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const Icon(
                     Icons.notifications,
-                    color: Color(0xFFD32F2F), // Red accent
+                    color: Color(0xFFDC2626), // Updated red color
                     size: 20,
                   ),
                 ),
@@ -144,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                       side: const BorderSide(
-                        color: Color(0xFFD32F2F), // Red border
+                        color: Color(0xFFDC2626), // Updated red color
                         width: 1,
                       ),
                     ),
@@ -162,8 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
+                          errorBuilder: (context, error, stackTrace) => Container(
                             color: Colors.grey[200],
                             child: const Icon(
                               Icons.image_not_supported,
@@ -202,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFFD32F2F),
+                            color: Color(0xFFDC2626), // Updated red color
                           ),
                         ),
                       ),
@@ -212,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     margin: const EdgeInsets.only(top: 8, bottom: 15),
                     height: 3,
                     width: 60,
-                    color: const Color(0xFFD32F2F), // Red underline
+                    color: const Color(0xFFDC2626), // Updated red color
                   ),
                 ],
               ),
@@ -222,13 +175,24 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: isLoading
-                  ? Center(
+              child: Selector<BloodBankFetchProvider, (bool, String?, List<dynamic>)>(
+                selector: (_, provider) => (
+                provider.isLoading,
+                provider.errorMessage,
+                provider.bloodBanks,
+                ),
+                builder: (_, data, __) {
+                  final isLoading = data.$1;
+                  final errorMessage = data.$2;
+                  final bloodBanks = data.$3;
+
+                  if (isLoading) {
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            color: const Color(0xFFD32F2F),
+                            color: const Color(0xFFDC2626), // Updated red color
                             strokeWidth: 3,
                           ),
                           const SizedBox(height: 12),
@@ -242,171 +206,80 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                    )
-                  : bloodBanks.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No blood banks found',
+                    );
+                  }
+
+                  if (errorMessage != null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            errorMessage,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey[600],
+                              color: Colors.red[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context.read<BloodBankFetchProvider>().fetchNearbyBloodBanks(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFDC2626), // Updated red color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Retry',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 3 / 4,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                          itemCount:
-                              bloodBanks.length > 4 ? 4 : bloodBanks.length,
-                          // Limit to 4 for preview
-                          itemBuilder: (context, index) {
-                            final bankData = bloodBanks[index];
-                            final bank = bankData['bloodBankId'];
-                            final quantity = bankData['quantity'];
+                        ],
+                      ),
+                    );
+                  }
 
-                            return AnimatedOpacity(
-                              opacity: 1.0,
-                              duration:
-                                  Duration(milliseconds: 300 + (index * 100)),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              BloodBankDetails(
-                                                  bloodData: bankData)));
-                                },
-                                child: Card(
-                                  elevation: 5,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: const Color(0xFFD32F2F)
-                                            .withOpacity(0.2),
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Bank Name
-                                          Text(
-                                            bank?['name'] ?? 'Unnamed Bank',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFF212121),
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          // Address
-                                          Text(
-                                            bank?['address'] ?? 'No address',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey[600],
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          // Units
-                                          Text(
-                                            'Units: ${quantity ?? 'N/A'}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFFD32F2F),
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          // Request Button
-                                          Container(
-                                            width: double.infinity,
-                                            decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [
-                                                  Color(0xFFD32F2F),
-                                                  Color(0xFFB71C1C),
-                                                ],
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: const Color(0xFFD32F2F)
-                                                      .withOpacity(0.3),
-                                                  blurRadius: 4,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            AddOrderScreen(
-                                                              bloodBank:
-                                                                  bankData,
-                                                            )));
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                shadowColor: Colors.transparent,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 12),
-                                              ),
-                                              child: const Text(
-                                                'Request Blood',
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                  if (bloodBanks.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No blood banks found',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
                         ),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 3 / 4,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: bloodBanks.length > 4 ? 4 : bloodBanks.length,
+                    itemBuilder: (context, index) {
+                      final bankData = bloodBanks[index];
+                      return BloodBankCard(
+                        bankData: bankData,
+                        index: index,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
-          // Spacer to ensure scrolling
           const SliverToBoxAdapter(
             child: SizedBox(height: 20),
           ),

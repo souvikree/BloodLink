@@ -7,10 +7,11 @@ class BloodBankDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bloodBank = bloodData['bloodBankId'] as Map<String, dynamic>;
+    // Extract blood groups as a string (e.g., "A+, A+, ...")
+    final bloodGroups = (bloodData['bloodGroups'] as List<dynamic>?)?.map((group) => group['bloodGroup'] as String).join(', ') ?? 'N/A';
 
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Soft grey for healthcare
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: const Text(
           'Blood Bank Details',
@@ -26,7 +27,7 @@ class BloodBankDetails extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Color(0xFFD32F2F), // Red accent
+            color: Color(0xFFD32F2F),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -77,42 +78,42 @@ class BloodBankDetails extends StatelessWidget {
                           margin: const EdgeInsets.only(top: 8, bottom: 16),
                           height: 3,
                           width: 60,
-                          color: const Color(0xFFD32F2F), // Red underline
+                          color: const Color(0xFFD32F2F),
                         ),
                         // Blood Bank Name
                         _buildDetailRow(
                           icon: Icons.local_hospital,
                           label: 'Name',
-                          value: bloodBank['name'] ?? 'N/A',
+                          value: bloodData['name'] ?? 'N/A',
                         ),
                         const SizedBox(height: 16),
                         // Contact Number
                         _buildDetailRow(
                           icon: Icons.phone,
                           label: 'Contact Number',
-                          value: bloodBank['contactNumber']?.toString() ?? 'N/A',
+                          value: bloodData['contactNumber']?.toString() ?? 'N/A',
                         ),
                         const SizedBox(height: 16),
                         // Address
                         _buildDetailRow(
                           icon: Icons.location_on,
                           label: 'Address',
-                          value: bloodBank['address'] ?? 'N/A',
+                          value: bloodData['address'] ?? 'N/A',
                           maxLines: 2,
                         ),
                         const SizedBox(height: 16),
-                        // Blood Group
+                        // Blood Groups
                         _buildDetailRow(
                           icon: Icons.water_drop,
-                          label: 'Blood Group',
-                          value: bloodData['bloodGroup'] ?? 'N/A',
+                          label: 'Blood Groups',
+                          value: bloodGroups,
                         ),
                         const SizedBox(height: 16),
-                        // Quantity
+                        // Available Units
                         _buildDetailRow(
                           icon: Icons.format_list_numbered,
                           label: 'Available Quantity',
-                          value: '${bloodData['quantity'] ?? 'N/A'} Units',
+                          value: '${bloodData['availableUnits'] ?? 'N/A'} Units',
                         ),
                       ],
                     ),
@@ -125,7 +126,7 @@ class BloodBankDetails extends StatelessWidget {
               margin: const EdgeInsets.only(top: 16, bottom: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)], // Red gradient
+                  colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -143,7 +144,7 @@ class BloodBankDetails extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Blood request initiated for ${bloodBank['name'] ?? 'N/A'}',
+                        'Blood request initiated for ${bloodData['name'] ?? 'N/A'}',
                       ),
                     ),
                   );

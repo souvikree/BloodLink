@@ -1,13 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
+
+import 'package:blood_link_flutter/blood_bank_details.dart';
+import 'package:blood_link_flutter/provider/blood_bank_fetch_provider.dart';
 import 'package:blood_link_flutter/search_blood_bank.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddOrderScreen extends StatefulWidget {
   final Map<String, dynamic>? bloodBank;
+
   const AddOrderScreen({super.key, this.bloodBank});
 
   @override
@@ -21,14 +25,23 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   File? _prescriptionImage;
-  final List<String> bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  final List<String> bloodGroups = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-'
+  ];
   bool isLoading = false;
   String? errorMessage;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
-    if(widget.bloodBank!=null){
+    if (widget.bloodBank != null) {
       _selectedBloodBank = widget.bloodBank;
     }
     super.initState();
@@ -50,7 +63,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('authToken');
 
-      final uri = Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/place-order');
+      final uri = Uri.parse(
+          'https://bloodlink-flsd.onrender.com/api/patients/place-order');
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
@@ -60,13 +74,14 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
         ..fields['deliveryAddress'] = _addressController.text.trim();
 
       if (_prescriptionImage != null) {
-        request.files.add(await http.MultipartFile.fromPath('prescription', _prescriptionImage!.path));
+        request.files.add(await http.MultipartFile.fromPath(
+            'prescription', _prescriptionImage!.path));
       }
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       print('response code ${response.statusCode}');
-      if (response.statusCode == 200 || response.statusCode==201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.pop(context, true); // Success
       } else {
         setState(() => errorMessage = 'Failed to place order');
@@ -79,12 +94,17 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   }
 
   void _selectBloodBank() async {
+    context.read<BloodBankFetchProvider>().onBloodGroupChanged(_selectedBloodGroup ?? '');
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SearchBloodBank(formAddOrder: true,)),
+      MaterialPageRoute(
+          builder: (context) => const SearchBloodBank(
+                formAddOrder: true,
+              )),
     );
     if (result != null && result is Map<String, dynamic>) {
       setState(() => _selectedBloodBank = result);
+      setState(() => _selectedBloodGroup=result['bloodGroups'][0]['bloodGroup']);
     }
   }
 
@@ -128,103 +148,175 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       ),
       body: isLoading
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              color: const Color(0xFFD32F2F),
-              strokeWidth: 3,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Submitting Order...',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      )
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              // Error Message
-              if (errorMessage != null)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD32F2F).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD32F2F)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: const Color(0xFFD32F2F),
+                    strokeWidth: 3,
                   ),
-                  child: Text(
-                    errorMessage!,
-                    style: const TextStyle(
-                      color: Color(0xFFD32F2F),
-                      fontSize: 14,
+                  const SizedBox(height: 12),
+                  Text(
+                    'Submitting Order...',
+                    style: TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
                     ),
                   ),
-                ),
-              // Blood Bank Selection
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFD32F2F).withOpacity(0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _selectBloodBank,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 24,
-                          ),
-                          minimumSize: const Size(double.infinity, 50),
+                    // Error Message
+                    if (errorMessage != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD32F2F).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFD32F2F)),
                         ),
                         child: Text(
-                          _selectedBloodBank == null
-                              ? 'Select Blood Bank'
-                              : 'Change Blood Bank',
+                          errorMessage!,
                           style: const TextStyle(
-                            fontSize: 16,
+                            color: Color(0xFFD32F2F),
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
                           ),
                         ),
                       ),
+                    // Blood Bank Selection
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFFDC2626).withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _selectBloodBank,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 24,
+                                ),
+                                minimumSize: const Size(double.infinity, 50),
+                              ),
+                              child: Text(
+                                _selectedBloodBank == null
+                                    ? 'Select Blood Bank'
+                                    : 'Change Blood Bank',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_selectedBloodBank != null)
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BloodBankDetails(
+                                        bloodData: _selectedBloodBank!,
+                                      ),
+                                    ));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFDC2626)
+                                        .withOpacity(0.3),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _selectedBloodBank!['name'] ??
+                                          'Unnamed Bank',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF212121),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _selectedBloodBank!['address'] ??
+                                          'No address',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey[600],
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Available Units: ${_selectedBloodBank!['availableUnits'] ?? 'N/A'}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFDC2626),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                    if (_selectedBloodBank != null)
-                      Container(
-                        margin: const EdgeInsets.only(top: 12),
-                        padding: const EdgeInsets.all(12),
+                    const SizedBox(height: 16),
+                    // Blood Group Dropdown
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 400),
+                      child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -239,200 +331,245 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                             ),
                           ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _selectedBloodBank!['bloodBankId']['name'] ?? 'Unnamed Bank',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF212121),
-                              ),
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedBloodGroup,
+                          items: bloodGroups
+                              .map((group) => DropdownMenuItem(
+                                    value: group,
+                                    child: Text(
+                                      group,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF212121),
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => _selectedBloodGroup = value),
+                          decoration: InputDecoration(
+                            labelText: 'Blood Type',
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _selectedBloodBank!['bloodBankId']['address'] ?? 'No address',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Available Units: ${_selectedBloodBank!['quantity'] ?? 'N/A'}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFFD32F2F),
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                          validator: (value) => value == null
+                              ? 'Please select a blood type'
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Quantity Field
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 500),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFD32F2F).withOpacity(0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Blood Group Dropdown
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 400),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFD32F2F).withOpacity(0.3),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedBloodGroup,
-                    items: bloodGroups
-                        .map((group) => DropdownMenuItem(
-                      value: group,
-                      child: Text(
-                        group,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF212121),
+                        child: TextFormField(
+                          controller: _quantityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Quantity (Units)',
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF212121),
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Please enter quantity' : null,
                         ),
                       ),
-                    ))
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => _selectedBloodGroup = value),
-                    decoration: InputDecoration(
-                      labelText: 'Blood Type',
-                      labelStyle: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                    ),
+                    const SizedBox(height: 16),
+                    // Delivery Address Field
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 600),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFD32F2F).withOpacity(0.3),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: _addressController,
+                          decoration: InputDecoration(
+                            labelText: 'Delivery Address',
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF212121),
+                          ),
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter delivery address'
+                              : null,
+                        ),
                       ),
                     ),
-                    validator: (value) =>
-                    value == null ? 'Please select a blood type' : null,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Quantity Field
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 500),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFD32F2F).withOpacity(0.3),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: TextFormField(
-                    controller: _quantityController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Quantity (Units)',
-                      labelStyle: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF212121),
-                    ),
-                    validator: (value) =>
-                    value!.isEmpty ? 'Please enter quantity' : null,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Delivery Address Field
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 600),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFD32F2F).withOpacity(0.3),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: TextFormField(
-                    controller: _addressController,
-                    decoration: InputDecoration(
-                      labelText: 'Delivery Address',
-                      labelStyle: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                    const SizedBox(height: 20),
+                    // Prescription Upload
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 700),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFD32F2F),
+                                    Color(0xFFB71C1C)
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFD32F2F)
+                                        .withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                onPressed: _pickImage,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                    horizontal: 24,
+                                  ),
+                                ),
+                                child: Text(
+                                  _prescriptionImage == null
+                                      ? 'Upload Prescription (Optional)'
+                                      : 'Change Prescription',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_prescriptionImage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 12),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Color(0xFF4CAF50),
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF212121),
-                    ),
-                    validator: (value) =>
-                    value!.isEmpty ? 'Please enter delivery address' : null,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Prescription Upload
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 700),
-                child: Row(
-                  children: [
-                    Expanded(
+                    if (_prescriptionImage != null)
+                      AnimatedOpacity(
+                        opacity: 1.0,
+                        duration: const Duration(milliseconds: 800),
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          height: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFFD32F2F).withOpacity(0.3),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              _prescriptionImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 24),
+                    // Submit Button
+                    AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 900),
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
@@ -450,7 +587,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: _pickImage,
+                          onPressed: _submitOrder,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -461,13 +598,12 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                               vertical: 16,
                               horizontal: 24,
                             ),
+                            minimumSize: const Size(double.infinity, 50),
                           ),
-                          child: Text(
-                            _prescriptionImage == null
-                                ? 'Upload Prescription (Optional)'
-                                : 'Change Prescription',
-                            style: const TextStyle(
-                              fontSize: 14,
+                          child: const Text(
+                            'Submit Order',
+                            style: TextStyle(
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
@@ -475,105 +611,10 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                         ),
                       ),
                     ),
-                    if (_prescriptionImage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Color(0xFF4CAF50),
-                            size: 24,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-              if (_prescriptionImage != null)
-                AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: const Duration(milliseconds: 800),
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    height: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFD32F2F).withOpacity(0.3),
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        _prescriptionImage!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 24),
-              // Submit Button
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 900),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFD32F2F).withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _submitOrder,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 24,
-                      ),
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text(
-                      'Submit Order',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

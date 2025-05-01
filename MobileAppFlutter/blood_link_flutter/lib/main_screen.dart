@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
-        color: const Color(0xFFD32F2F), // Red for blood bank theme
+        color: const Color(0xFFDC2626), // Red for blood bank theme
         backgroundColor: Colors.grey[100]!, // Soft grey background
         items: [
           CurvedNavigationBarItem(
