@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   patient: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
   bloodBank: { type: mongoose.Schema.Types.ObjectId, ref: 'BloodBank', required: true },
+  reservedUnits: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Inventory' }], 
   bloodType: { type: String, required: true },
   quantity: { type: Number, required: true },
   deliveryAddress: { type: String, required: true },
