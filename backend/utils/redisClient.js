@@ -1,8 +1,5 @@
 const Redis = require('ioredis');
 
-const redisOptions = {
-  maxRetriesPerRequest: null, // 🔥 Required by BullMQ
-};
 
 // Use the full Redis URL if available (for both local and Render)
 const redis = process.env.REDIS_URL 
@@ -15,4 +12,4 @@ const redis = process.env.REDIS_URL
 redis.on('connect', () => console.log('✅ Redis connected'));
 redis.on('error', (err) => console.error('❌ Redis error:', err));
 
-module.exports = { redis, redisOptions };
+module.exports = redis;
