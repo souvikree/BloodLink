@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:blood_link_flutter/blood_bank_details.dart';
@@ -8,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'order_confirmation_page.dart';
 
 class AddOrderScreen extends StatefulWidget {
   final Map<String, dynamic>? bloodBank;
@@ -53,7 +56,6 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       setState(() => _prescriptionImage = File(picked.path));
     }
   }
-
   Future<void> _submitOrder() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -63,26 +65,41 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('authToken');
 
-      final uri = Uri.parse(
-          'https://bloodlink-flsd.onrender.com/api/patients/place-order');
+      final uri = Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/place-order');
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
-        ..fields['bloodBank'] = _selectedBloodBank!['bloodBankId']['_id'] ?? ''
+        ..fields['bloodBank'] = _selectedBloodBank?['_id'] ?? ''
         ..fields['bloodType'] = _selectedBloodGroup ?? ''
         ..fields['quantity'] = _quantityController.text.trim()
         ..fields['deliveryAddress'] = _addressController.text.trim();
 
       if (_prescriptionImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-            'prescription', _prescriptionImage!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'prescription',
+            _prescriptionImage!.path,
+          ),
+        );
       }
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      print('response code ${response.statusCode}');
+
+      print('Response code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Navigator.pop(context, true); // Success
+        final responseData = jsonDecode(response.body);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderConfirmationScreen(
+              orderData: responseData['order'], // Now correctly parsed
+            ),
+          ),
+        );
       } else {
         setState(() => errorMessage = 'Failed to place order');
       }
