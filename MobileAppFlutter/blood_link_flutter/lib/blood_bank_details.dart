@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'add_order_screen.dart';
+import 'extra_functions.dart';
+
 class BloodBankDetails extends StatelessWidget {
   final Map<String, dynamic> bloodData;
 
@@ -9,14 +12,10 @@ class BloodBankDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Extract unique blood groups
-    final bloodGroupsList = (bloodData['bloodGroups'] as List<dynamic>?) ?? [];
-    final uniqueBloodGroups = bloodGroupsList
-        .map((group) => group['bloodGroup'] as String)
-        .toSet()
-        .toList();
 
-    final bloodGroupsText = uniqueBloodGroups.isNotEmpty
-        ? uniqueBloodGroups.join(', ')
+    final bloodGroupUnitMap = countBloodGroupType(bloodData);
+    final bloodGroupsText = bloodGroupUnitMap.isNotEmpty
+        ? bloodGroupUnitMap.entries.map((e) => '${e.key} (${e.value})').join(', ')
         : 'N/A';
 
     return Scaffold(
@@ -152,10 +151,11 @@ class BloodBankDetails extends StatelessWidget {
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Blood request initiated for ${bloodData['name'] ?? 'N/A'}',
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddOrderScreen(
+                        bloodBank: bloodData,
                       ),
                     ),
                   );

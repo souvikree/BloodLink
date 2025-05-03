@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'extra_functions.dart';
 import 'order_confirmation_page.dart';
 
 class AddOrderScreen extends StatefulWidget {
@@ -46,6 +47,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   void initState() {
     if (widget.bloodBank != null) {
       _selectedBloodBank = widget.bloodBank;
+      _selectedBloodGroup = widget.bloodBank!['bloodGroups'][0]['bloodGroup'];
     }
     super.initState();
   }
@@ -56,6 +58,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       setState(() => _prescriptionImage = File(picked.path));
     }
   }
+
   Future<void> _submitOrder() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -65,7 +68,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('authToken');
 
-      final uri = Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/place-order');
+      final uri = Uri.parse(
+          'https://bloodlink-flsd.onrender.com/api/patients/place-order');
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
@@ -111,7 +115,9 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
   }
 
   void _selectBloodBank() async {
-    context.read<BloodBankFetchProvider>().onBloodGroupChanged(_selectedBloodGroup ?? '');
+    context
+        .read<BloodBankFetchProvider>()
+        .onBloodGroupChanged(_selectedBloodGroup ?? '');
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -121,7 +127,8 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
     );
     if (result != null && result is Map<String, dynamic>) {
       setState(() => _selectedBloodBank = result);
-      setState(() => _selectedBloodGroup=result['bloodGroups'][0]['bloodGroup']);
+      setState(
+          () => _selectedBloodGroup = result['bloodGroups'][0]['bloodGroup']);
     }
   }
 
@@ -132,8 +139,15 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    final bloodGroupUnitMap = countBloodGroupType(_selectedBloodBank);
+
+// Convert the map to a list of blood groups with units
+
+
     return Scaffold(
       backgroundColor: Colors.grey[100], // Soft grey for healthcare
       appBar: AppBar(
@@ -263,12 +277,13 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                             InkWell(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BloodBankDetails(
-                                        bloodData: _selectedBloodBank!,
-                                      ),
-                                    ));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BloodBankDetails(
+                                      bloodData: _selectedBloodBank!,
+                                    ),
+                                  ),
+                                );
                               },
                               child: Container(
                                 margin: const EdgeInsets.only(top: 12),
@@ -282,7 +297,7 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withOpacity(0.05),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     ),
@@ -321,6 +336,38 @@ class _AddOrderScreenState extends State<AddOrderScreen> {
                                         color: Color(0xFFDC2626),
                                       ),
                                     ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: List.generate(
+                                        bloodGroupUnitMap.keys.length,
+                                            (index) {
+                                          final bloodGroup = bloodGroupUnitMap.keys.elementAt(index);
+                                          final units = bloodGroupUnitMap[bloodGroup] ?? 0;
+                                          return GestureDetector(
+                                            onTap: () {
+                                              setState(() => _selectedBloodGroup = bloodGroup);
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFDC2626).withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                '$bloodGroup ($units)', // Displaying the blood group with its unit count
+                                                style: const TextStyle(
+                                                  color: Color(0xFFDC2626),
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
