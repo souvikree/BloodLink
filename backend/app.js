@@ -27,8 +27,11 @@ const io = setupSocket(server);
 // Inject socket.io into app
 app.set('io', io);
 
-// ✅ Pass io to expireInventoryJob so cron jobs can send notifications
+//Pass io to expireInventoryJob so cron jobs can send notifications
 setIO(io);
+
+//Start BullMQ background worker to auto-reject orders after 24 hours
+require('./workers/orderStatusWorker');
 
 // Middleware
 app.use(cors());

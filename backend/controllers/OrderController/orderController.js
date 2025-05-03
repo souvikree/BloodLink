@@ -3,6 +3,7 @@ const Inventory = require('../../models/BloodBankModel/Inventory');
 const handlingChargeMap = require('../../config/handlingCharges');
 const { createNotification } = require('../../controllers/NotificationController/notificationController');
 const { getCoordinates } = require('../../utils/geocode');
+const orderStatusQueue = require('../../queues/orderStatusQueue');
 
 
 
@@ -64,6 +65,16 @@ const placeOrder = async (req, res) => {
     await Inventory.updateMany(
       { _id: { $in: availableUnits.map(unit => unit._id) } },
       { $set: { status: 'reserved' } } // Or 'sold' depending on your flow
+    );
+
+    // ✅ Schedule auto-reject job after 24 hours
+    await orderStatusQueue.add(
+      'auto-reject-order',
+      { orderId: order._id.toString() },
+      {
+        delay: 24 * 60 * 60 * 1000,
+        jobId: `reject_${order._id}`
+      }
     );
 
     // ✅ Real-time Notifications
@@ -131,48 +142,33 @@ const cancelOrder = async (req, res) => {
   const io = req.app.get('io');
 
   try {
-    // Find the order
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    // Authorization: Only the patient who placed the order can cancel
     if (!order.patient.equals(userId)) {
-      return res.status(403).json({ message: 'Unauthorized to cancel this order' });
+      return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    // Allow cancellation only if the order is pending or accepted
     if (!['pending', 'accepted'].includes(order.status)) {
       return res.status(400).json({ message: `Cannot cancel an order that is already ${order.status}` });
     }
 
-    // Use atomic update to avoid race condition
     const updatedOrder = await Order.findOneAndUpdate(
-      {
-        _id: orderId,
-        status: { $in: ['pending', 'accepted'] } // extra safety
-      },
-      {
-        status: 'cancelled'
-      },
+      { _id: orderId, status: { $in: ['pending', 'accepted'] } },
+      { status: 'cancelled' },
       { new: true }
     );
 
     if (!updatedOrder) {
-      return res.status(409).json({ message: 'Order could not be cancelled (maybe already processed)' });
+      return res.status(409).json({ message: 'Order could not be cancelled' });
     }
 
-    // ✅ Restore inventory if already deducted
-    const inventory = await Inventory.findOne({
-      bloodBankId: order.bloodBank,
-      bloodGroup: order.bloodType
-    });
+    // ✅ Restore only reserved (not used) units
+    await Inventory.updateMany(
+      { _id: { $in: order.reservedUnits }, status: 'reserved' },
+      { $set: { status: 'available' } }
+    );
 
-    if (inventory) {
-      inventory.quantity += order.quantity; // restore stock
-      await inventory.save();
-    }
-
-    // ✅ Send notifications
     await createNotification(order.patient, 'Patient', `Your order for ${order.bloodType} blood was cancelled.`, io);
     await createNotification(order.bloodBank, 'BloodBank', `A patient cancelled their ${order.bloodType} order.`, io);
 

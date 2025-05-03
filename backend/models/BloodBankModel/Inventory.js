@@ -10,7 +10,7 @@ const inventorySchema = new mongoose.Schema({
   quantity: { type: Number, default: 1 }, // 1 unit per entry (best practice)
   donorId: { type: mongoose.Schema.Types.ObjectId, ref: "Donor" }, // New field
   expiryDate: { type: Date, required: true }, // New field
-  status: { type: String, enum: ["available", "reserved", "expired"], default: "available" },
+  status: { type: String, enum: ["available", "reserved", "expired", "used"], default: "available" },
   expiredAt: { type: Date, default: null }, 
 }, { timestamps: true });
 
