@@ -14,6 +14,8 @@ const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
 const { getInventoryStats } = require("../../services/BloodBankService/inventoryService");
 
+const orderStatusQueue = require('../../queues/orderStatusQueue');
+
 
 exports.register = async (req, res) => {
   try {
@@ -351,11 +353,6 @@ exports.getOrders = async (req, res) => {
 };
 
 
-
-const { Queue } = require('bullmq');
-const Redis = require('ioredis');
-const connection = new Redis();
-const orderStatusQueue = new Queue('order-status', { connection });
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
