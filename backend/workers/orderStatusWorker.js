@@ -5,7 +5,7 @@ const createNotification = require('../controllers/NotificationController/notifi
 
 const redisConnection = {
     connection: {
-      url: process.env.REDIS_URL,
+      url: process.env.QUEUE_REDIS_URL,
       maxRetriesPerRequest: null,
     },
   };
