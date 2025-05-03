@@ -3,15 +3,12 @@ const Order = require('../models/patientModel/Order');
 const Inventory = require('../models/BloodBankModel/Inventory');
 const createNotification = require('../controllers/NotificationController/notificationController');
 
-const redisConnection = process.env.REDIS_URL
-  ? { connection: { maxRetriesPerRequest: null, url: process.env.REDIS_URL } }
-  : {
-      connection: {
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: process.env.REDIS_PORT || 6379,
-        maxRetriesPerRequest: null,
-      },
-    };
+const redisConnection = {
+    connection: {
+      url: process.env.REDIS_URL,
+      maxRetriesPerRequest: null,
+    },
+  };
 
 const orderStatusWorker = new Worker(
   'order-status',
