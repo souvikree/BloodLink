@@ -1,15 +1,15 @@
 const { Worker } = require('bullmq');
-const Redis = require('ioredis');
+const connection = require('../utils/redisClient'); 
 const Order = require('../models/patientModel/Order');
 const Inventory = require('../models/BloodBankModel/Inventory');
 const createNotification = require('../controllers/NotificationController/notificationController');
 
-// ✅ Fix: pass correct options to Redis
-const redisOptions = {
-  maxRetriesPerRequest: null,
-};
+// // ✅ Fix: pass correct options to Redis
+// const redisOptions = {
+//   maxRetriesPerRequest: null,
+// };
 
-const connection = new Redis(redisOptions);
+// const connection = new Redis(redisOptions);
 
 const orderStatusWorker = new Worker(
   'order-status',
