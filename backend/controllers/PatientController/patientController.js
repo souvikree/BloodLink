@@ -240,15 +240,15 @@ const smartSearchBloodBanks = async (req, res) => {
     const patientLat = parseFloat(latitude);
     const patientLng = parseFloat(longitude);
 
-    // Validate blood group
+    // ✅ Validate and get compatible groups
     const compatibleGroups = getCompatibleBloodGroups(bloodGroup);
+    const searchedGroup = bloodGroup;
 
     let radius = INITIAL_RADIUS;
     let found = false;
     let responseData = [];
 
     while (radius <= MAX_RADIUS && !found) {
-      // Step 1: Find nearby blood banks within radius
       const nearbyBloodBanks = await BloodBank.find({
         location: {
           $near: {
@@ -268,7 +268,6 @@ const smartSearchBloodBanks = async (req, res) => {
 
       const nearbyBankIds = nearbyBloodBanks.map((b) => b._id);
 
-      // Step 2: Get inventory with matching blood groups and > 0 quantity
       const inventories = await Inventory.find({
         bloodGroup: { $in: compatibleGroups },
         quantity: { $gt: 0 },
@@ -279,14 +278,13 @@ const smartSearchBloodBanks = async (req, res) => {
         .sort({ quantity: -1 });
 
       if (inventories.length > 0) {
-        // Format result: group inventory by blood bank
         const groupedResults = {};
 
         inventories.forEach((inv) => {
           const id = inv.bloodBankId._id;
           const bankLat = inv.bloodBankId.location.coordinates[1];
           const bankLng = inv.bloodBankId.location.coordinates[0];
-
+        
           if (!groupedResults[id]) {
             groupedResults[id] = {
               _id: id,
@@ -294,23 +292,39 @@ const smartSearchBloodBanks = async (req, res) => {
               address: inv.bloodBankId.address,
               contactNumber: inv.bloodBankId.contactNumber,
               location: inv.bloodBankId.location,
-              availableUnits: 0,
-              bloodGroups: [],
-              directionLinks: buildDirectionLinks(
-                patientLat,
-                patientLng,
-                bankLat,
-                bankLng
-              ),
+              directionLinks: buildDirectionLinks(patientLat, patientLng, bankLat, bankLng),
+              availableUnits: {
+                searched: null,
+                compatible: []
+              }
             };
           }
-
-          groupedResults[id].availableUnits += inv.quantity;
-          groupedResults[id].bloodGroups.push({
-            bloodGroup: inv.bloodGroup,
-            units: inv.quantity,
-          });
+        
+          if (inv.bloodGroup === searchedGroup) {
+            if (!groupedResults[id].availableUnits.searched) {
+              groupedResults[id].availableUnits.searched = {
+                bloodGroup: searchedGroup,
+                units: inv.quantity
+              };
+            } else {
+              groupedResults[id].availableUnits.searched.units += inv.quantity;
+            }
+          } else {
+            // Merge compatible groups by blood group
+            const existing = groupedResults[id].availableUnits.compatible.find(
+              (entry) => entry.bloodGroup === inv.bloodGroup
+            );
+            if (existing) {
+              existing.units += inv.quantity;
+            } else {
+              groupedResults[id].availableUnits.compatible.push({
+                bloodGroup: inv.bloodGroup,
+                units: inv.quantity
+              });
+            }
+          }
         });
+        
 
         responseData = Object.values(groupedResults);
         found = true;
@@ -325,7 +339,7 @@ const smartSearchBloodBanks = async (req, res) => {
       radius += RADIUS_INCREMENT;
     }
 
-    // Step 3: Fallback - nearest blood bank within 10km, even if no inventory
+    // Fallback: nearest blood bank even if no units available
     const fallback = await BloodBank.aggregate([
       {
         $geoNear: {
@@ -357,7 +371,6 @@ const smartSearchBloodBanks = async (req, res) => {
       });
     }
 
-    // Step 4: No blood banks at all found
     return res.status(404).json({
       success: false,
       message: "No blood banks found nearby.",
@@ -372,6 +385,7 @@ const smartSearchBloodBanks = async (req, res) => {
     });
   }
 };
+
 
 
 
