@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BloodBankDetails extends StatelessWidget {
   final Map<String, dynamic> bloodData;
@@ -7,8 +8,16 @@ class BloodBankDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract blood groups as a string (e.g., "A+, A+, ...")
-    final bloodGroups = (bloodData['bloodGroups'] as List<dynamic>?)?.map((group) => group['bloodGroup'] as String).join(', ') ?? 'N/A';
+    // Extract unique blood groups
+    final bloodGroupsList = (bloodData['bloodGroups'] as List<dynamic>?) ?? [];
+    final uniqueBloodGroups = bloodGroupsList
+        .map((group) => group['bloodGroup'] as String)
+        .toSet()
+        .toList();
+
+    final bloodGroupsText = uniqueBloodGroups.isNotEmpty
+        ? uniqueBloodGroups.join(', ')
+        : 'N/A';
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -102,11 +111,11 @@ class BloodBankDetails extends StatelessWidget {
                           maxLines: 2,
                         ),
                         const SizedBox(height: 16),
-                        // Blood Groups
+                        // Blood Groups (Unique only)
                         _buildDetailRow(
                           icon: Icons.water_drop,
-                          label: 'Blood Groups',
-                          value: bloodGroups,
+                          label: 'Available Blood Groups',
+                          value: bloodGroupsText,
                         ),
                         const SizedBox(height: 16),
                         // Available Units
@@ -115,6 +124,8 @@ class BloodBankDetails extends StatelessWidget {
                           label: 'Available Quantity',
                           value: '${bloodData['availableUnits'] ?? 'N/A'} Units',
                         ),
+                        const SizedBox(height: 16),
+                        _buildMapLinksSection(context),
                       ],
                     ),
                   ),
@@ -166,6 +177,96 @@ class BloodBankDetails extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildMapLinksSection(BuildContext context) {
+    final directionLinks = bloodData['directionLinks'] ?? {};
+    final googleMapsUrl = directionLinks['googleMapsUrl'] ?? '';
+    final appleMapsUrl = directionLinks['appleMapsUrl'] ?? '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDetailRow(
+          icon: Icons.directions, // Icon before "Get Directions"
+          label: 'Get Directions',
+          value: 'Get the blood bank location by clicking the buttons.', // Empty value since it's a heading
+          maxLines: 2,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 16,
+          runSpacing: 12,
+          children: [
+            _buildMapButton(
+              label: 'Google Maps',
+              icon: Icons.map,
+              url: googleMapsUrl,
+              gradientColors: [Color(0xFF4285F4), Color(0xFF34A853)], // Google colors
+            ),
+            _buildMapButton(
+              label: 'Apple Maps',
+              icon: Icons.map_outlined,
+              url: appleMapsUrl,
+              gradientColors: [Color(0xFF000000), Color(0xFF555555)], // Sleek gray
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapButton({
+    required String label,
+    required IconData icon,
+    required String url,
+    required List<Color> gradientColors,
+  }) {
+    return GestureDetector(
+      onTap: () async {
+        if (await canLaunchUrl(Uri.parse(url))) {
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        } else {
+          debugPrint('Could not launch $url');
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.first.withOpacity(0.4),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

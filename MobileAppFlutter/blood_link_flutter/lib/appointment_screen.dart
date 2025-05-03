@@ -26,6 +26,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   }
 
   Future<void> fetchOrders() async {
+    setState(() => isLoading = true);
     try {
       final prefs = await SharedPreferences.getInstance();
       final token =
@@ -57,7 +58,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       } else {
         // Handle error
         setState(() => isLoading = false);
-        debugPrint('Error fetching orders: ${response.body}');
+        debugPrint('Sorry for the inconvenience, no blood banks found.');
+
       }
     } catch (e) {
       setState(() => isLoading = false);
@@ -89,34 +91,37 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           ),
         ),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : orders.isEmpty
-              ? const Center(child: Text('No orders found'))
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  itemCount: orders.length,
-                  itemBuilder: (context, index) {
-                    final appointment = orders[index];
-                    return RequestItem(
-                      bloodBankId: appointment['bloodBank']?['name'] ??
-                          'Unknown Blood Bank',
-                      bloodGroup: appointment['bloodType'] ?? 'Unknown Group',
-                      quantity: appointment['quantity']?.toString() ?? '0',
-                      order: appointment,
-                      orderDetailsPage: () async {
-                       bool result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    OrderDetailsPage(order: appointment))) as bool;
-                       if(result){
-                         fetchOrders();
-                       }
-                      },
-                    );
-                  },
-                ),
+      body: RefreshIndicator(
+        onRefresh: fetchOrders,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : orders.isEmpty
+                ? const Center(child: Text('No orders found'))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final appointment = orders[index];
+                      return RequestItem(
+                        bloodBankId: appointment['bloodBank']?['name'] ??
+                            'Unknown Blood Bank',
+                        bloodGroup: appointment['bloodType'] ?? 'Unknown Group',
+                        quantity: appointment['quantity']?.toString() ?? '0',
+                        order: appointment,
+                        orderDetailsPage: () async {
+                         bool result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      OrderDetailsPage(order: appointment))) as bool;
+                         if(result){
+                           fetchOrders();
+                         }
+                        },
+                      );
+                    },
+                  ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

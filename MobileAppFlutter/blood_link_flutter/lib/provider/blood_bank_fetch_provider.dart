@@ -137,7 +137,7 @@ class BloodBankFetchProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error: $e');
       isLoading = false;
-      errorMessage = 'Error fetching blood banks: $e';
+      errorMessage = 'No blood banks found. Sorry for the inconvenience.';
     }
     notifyListeners();
   }

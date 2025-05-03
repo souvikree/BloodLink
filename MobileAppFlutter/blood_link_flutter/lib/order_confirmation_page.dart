@@ -294,10 +294,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.popUntil(
-                      context,
-                      ModalRoute.withName(Navigator.defaultRouteName),
-                    ),
+                    onPressed: () => Navigator.pop(context,true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,

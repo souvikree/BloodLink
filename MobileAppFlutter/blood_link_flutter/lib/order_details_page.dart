@@ -63,80 +63,41 @@ class OrderDetailsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
+                    // Inside the Column of the Card
                     children: [
-                      // Header
-                      const Text(
-                        'Order Information',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF212121),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 8, bottom: 16),
-                        height: 3,
-                        width: 60,
-                        color: const Color(0xFFD32F2F),
-                      ),
-                      // Order ID
-                      _buildDetailRow(
-                        icon: Icons.assignment,
-                        label: 'Order ID',
-                        value: order['_id'] ?? 'N/A',
-                      ),
+                      const Text('Order Information', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF212121))),
+                      Container(margin: const EdgeInsets.only(top: 8, bottom: 16), height: 3, width: 60, color: const Color(0xFFD32F2F)),
+                      _buildDetailRow(icon: Icons.assignment, label: 'Order ID', value: order['_id'] ?? 'N/A'),
                       const SizedBox(height: 16),
-                      // Patient ID
-                      _buildDetailRow(
-                        icon: Icons.person,
-                        label: 'Patient ID',
-                        value: order['patient'] ?? 'N/A',
-                      ),
+                      _buildDetailRow(icon: Icons.person, label: 'Patient ID', value: order['patient'] ?? 'N/A'),
                       const SizedBox(height: 16),
-                      // Blood Bank Name
-                      _buildDetailRow(
-                        icon: Icons.local_hospital,
-                        label: 'Blood Bank Name',
-                        value: order['bloodBank']?['name'] ?? 'N/A',
-                      ),
+                      _buildDetailRow(icon: Icons.bloodtype, label: 'Blood Type', value: order['bloodType'] ?? 'N/A'),
                       const SizedBox(height: 16),
-                      // Blood Bank Address
-                      _buildDetailRow(
-                        icon: Icons.location_on,
-                        label: 'Blood Bank Address',
-                        value: order['bloodBank']?['address'] ?? 'N/A',
-                        maxLines: 2,
-                      ),
+                      _buildDetailRow(icon: Icons.format_list_numbered, label: 'Quantity', value: order['quantity'] != null ? '${order['quantity']} units' : 'N/A'),
+                      const SizedBox(height: 16),
+                      _buildDetailRow(icon: Icons.location_on, label: 'Delivery Address', value: order['deliveryAddress'] ?? 'N/A', maxLines: 2),
+                      const SizedBox(height: 16),
+                      _buildDetailRow(icon: Icons.local_hospital, label: 'Blood Bank Name', value: order['bloodBank']?['name'] ?? 'N/A'),
+                      const SizedBox(height: 16),
+                      _buildDetailRow(icon: Icons.location_on, label: 'Blood Bank Address', value: order['bloodBank']?['address'] ?? 'N/A', maxLines: 2),
                       const SizedBox(height: 16),
                       InkWell(
                         onTap: () async {
-                          final String? contactNumber =
-                          order['bloodBank']?['contactNumber']?.toString();
+                          final String? contactNumber = order['bloodBank']?['contactNumber']?.toString();
                           if (contactNumber != null && contactNumber.isNotEmpty) {
                             await FlutterPhoneDirectCaller.callNumber(contactNumber);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Contact number is not available.'),
-                              ),
-                            );
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact number is not available.')));
                           }
                         },
-                        child: _buildDetailRow(
-                          icon: Icons.phone,
-                          label: 'Contact Number',
-                          value: order['bloodBank']?['contactNumber']?.toString() ??
-                              'N/A',
-                        ),
+                        child: _buildDetailRow(icon: Icons.phone, label: 'Contact Number', value: order['bloodBank']?['contactNumber']?.toString() ?? 'N/A'),
                       ),
                       const SizedBox(height: 16),
-                      // License Document URL
-                      _buildPrescriptionRow(
-                        context: context,
-                        icon: Icons.description,
-                        label: 'Prescription Document',
-                        prescription: order['prescriptionUrl'],
-                      ),
+                      _buildPrescriptionRow(context: context, icon: Icons.description, label: 'Prescription Document', prescription: order['prescriptionUrl']),
+                      const SizedBox(height: 16),
+                      _buildDetailRow(icon: Icons.payment, label: 'Payment Status', value: order['paymentStatus']?.toUpperCase() ?? 'N/A'),
+                      const SizedBox(height: 16),
+                      _buildDetailRow(icon: Icons.account_balance_wallet, label: 'Total Price', value: order['totalPrice'] != null ? '₹${order['totalPrice'].toStringAsFixed(2)}' : 'N/A'),
                     ],
                   ),
                 ),
