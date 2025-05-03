@@ -350,29 +350,61 @@ exports.getOrders = async (req, res) => {
   }
 };
 
+
+
+const { Queue } = require('bullmq');
+const Redis = require('ioredis');
+const connection = new Redis();
+const orderStatusQueue = new Queue('order-status', { connection });
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
+    const io = req.app.get('io');
 
     const allowedStatuses = ["accepted", "rejected", "ready"];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status." });
     }
 
-    const order = await Order.findOneAndUpdate(
-      { _id: orderId, bloodBank: req.user.id },
-      { status },
-      { new: true }
-    );
+    const order = await Order.findOne({ _id: orderId, bloodBank: req.user.id });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found." });
     }
+
+    // ✅ Deduct only when status is being changed to "accepted"
+    if (status === 'accepted' && order.status === 'pending') {
+      // Mark reserved units as 'used'
+      await Inventory.updateMany(
+        { _id: { $in: order.reservedUnits }, status: 'reserved' },
+        { $set: { status: 'used' } }
+      );
+    }
+
+    // ✅ If rejected, mark reserved units as available again
+    if (status === 'rejected' && order.status === 'pending') {
+      await Inventory.updateMany(
+        { _id: { $in: order.reservedUnits }, status: 'reserved' },
+        { $set: { status: 'available' } }
+      );
+    }
+
+
+    // ✅ Cancel auto-reject job if status updated manually
+    await orderStatusQueue.remove(`reject_${orderId}`);
+
+    order.status = status;
+    await order.save();
+
+    // Notifications
+    await createNotification(order.patient, 'Patient', `Your order was ${status} by the blood bank.`, io);
+    await createNotification(order.bloodBank, 'BloodBank', `Order updated to ${status}.`, io);
 
     res.status(200).json({ message: `Order status updated to ${status}.`, order });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 

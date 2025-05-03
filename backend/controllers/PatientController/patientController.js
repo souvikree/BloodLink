@@ -273,6 +273,7 @@ const smartSearchBloodBanks = async (req, res) => {
         bloodGroup: { $in: compatibleGroups },
         quantity: { $gt: 0 },
         bloodBankId: { $in: nearbyBankIds },
+        status: 'available',
       })
         .populate("bloodBankId", "name address contactNumber location")
         .sort({ quantity: -1 });
