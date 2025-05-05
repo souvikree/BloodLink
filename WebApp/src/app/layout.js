@@ -2,7 +2,7 @@
 
 import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/landingpage/sections/Navbar";
+import Navbar from "../components/landingpage/sections/Navbar";
 import { usePathname } from "next/navigation"; // Import from next/navigation
 
 const primaryFont = Instrument_Sans({
