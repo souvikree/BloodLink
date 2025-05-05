@@ -1,15 +1,14 @@
 const { Worker } = require('bullmq');
-const Redis = require('ioredis');
 const Order = require('../models/patientModel/Order');
 const Inventory = require('../models/BloodBankModel/Inventory');
 const createNotification = require('../controllers/NotificationController/notificationController');
 
-// ✅ Fix: pass correct options to Redis
-const redisOptions = {
-  maxRetriesPerRequest: null,
-};
-
-const connection = new Redis(redisOptions);
+const redisConnection = {
+    connection: {
+      url: process.env.QUEUE_REDIS_URL,
+      maxRetriesPerRequest: null,
+    },
+  };
 
 const orderStatusWorker = new Worker(
   'order-status',
@@ -19,21 +18,25 @@ const orderStatusWorker = new Worker(
     const order = await Order.findById(orderId);
     if (!order || order.status !== 'pending') return;
 
-    // ✅ Auto-reject order
     order.status = 'rejected';
     await order.save();
 
-    // ✅ Release reserved units
     await Inventory.updateMany(
       { _id: { $in: order.reservedUnits }, status: 'reserved' },
       { $set: { status: 'available' } }
     );
 
-    // ✅ Notify patient
-    await createNotification(order.patient, 'Patient', 'Your order was auto-rejected after 24 hours of inactivity.');
+    await createNotification(
+      order.patient,
+      'Patient',
+      'Your order was auto-rejected after 24 hours of inactivity.'
+    );
   },
-  { connection }
+  redisConnection
+  
 );
 
 console.log('🛠️ orderStatusWorker started...');
+console.log('Redis URL:', process.env.QUEUE_REDIS_URL);
+
 module.exports = orderStatusWorker;
