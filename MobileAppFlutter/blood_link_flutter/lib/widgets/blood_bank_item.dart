@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../add_order_screen.dart';
 import '../blood_bank_details.dart';
+import '../extra_functions.dart';
 
 class BloodBankCard extends StatelessWidget {
   final Map<String, dynamic> bankData;
@@ -16,7 +17,7 @@ class BloodBankCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quantity = bankData['availableUnits']?.toString() ?? 'N/A';
+    final quantity = totalBloodBankUnit(bankData);
     debugPrint('Bank data: $bankData');
 
     return AnimatedOpacity(

@@ -11,8 +11,10 @@ class BloodBankDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract unique blood groups
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
+    // Extract unique blood groups
     final bloodGroupUnitMap = countBloodGroupType(bloodData);
     final bloodGroupsText = bloodGroupUnitMap.isNotEmpty
         ? bloodGroupUnitMap.entries.map((e) => '${e.key} (${e.value})').join(', ')
@@ -21,12 +23,12 @@ class BloodBankDetails extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Blood Bank Details',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: screenWidth * 0.06, // responsive
             fontWeight: FontWeight.w800,
-            color: Color(0xFF212121),
+            color: const Color(0xFF212121),
           ),
         ),
         backgroundColor: Colors.white,
@@ -48,7 +50,7 @@ class BloodBankDetails extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: Column(
           children: [
             Expanded(
@@ -68,72 +70,85 @@ class BloodBankDetails extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header
-                        const Text(
-                          'Blood Bank Information',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF212121),
+                    padding: EdgeInsets.all(screenWidth * 0.05),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Blood Bank Information',
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.05,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF212121),
+                            ),
                           ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 8, bottom: 16),
-                          height: 3,
-                          width: 60,
-                          color: const Color(0xFFD32F2F),
-                        ),
-                        // Blood Bank Name
-                        _buildDetailRow(
-                          icon: Icons.local_hospital,
-                          label: 'Name',
-                          value: bloodData['name'] ?? 'N/A',
-                        ),
-                        const SizedBox(height: 16),
-                        // Contact Number
-                        _buildDetailRow(
-                          icon: Icons.phone,
-                          label: 'Contact Number',
-                          value: bloodData['contactNumber']?.toString() ?? 'N/A',
-                        ),
-                        const SizedBox(height: 16),
-                        // Address
-                        _buildDetailRow(
-                          icon: Icons.location_on,
-                          label: 'Address',
-                          value: bloodData['address'] ?? 'N/A',
-                          maxLines: 2,
-                        ),
-                        const SizedBox(height: 16),
-                        // Blood Groups (Unique only)
-                        _buildDetailRow(
-                          icon: Icons.water_drop,
-                          label: 'Available Blood Groups',
-                          value: bloodGroupsText,
-                        ),
-                        const SizedBox(height: 16),
-                        // Available Units
-                        _buildDetailRow(
-                          icon: Icons.format_list_numbered,
-                          label: 'Available Quantity',
-                          value: '${bloodData['availableUnits'] ?? 'N/A'} Units',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildMapLinksSection(context),
-                      ],
+                          Container(
+                            margin: EdgeInsets.only(
+                                top: screenHeight * 0.008,
+                                bottom: screenHeight * 0.02),
+                            height: 3,
+                            width: screenWidth * 0.15,
+                            color: const Color(0xFFD32F2F),
+                          ),
+
+                          _buildDetailRow(
+                            icon: Icons.local_hospital,
+                            label: 'Name',
+                            value: bloodData['name'] ?? 'N/A',
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildDetailRow(
+                            icon: Icons.phone,
+                            label: 'Contact Number',
+                            value: bloodData['contactNumber']?.toString() ?? 'N/A',
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildDetailRow(
+                            icon: Icons.location_on,
+                            label: 'Address',
+                            value: bloodData['address'] ?? 'N/A',
+                            maxLines: 2,
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildDetailRow(
+                            icon: Icons.water_drop,
+                            label: 'Available Blood Groups',
+                            value: bloodGroupsText,
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildDetailRow(
+                            icon: Icons.format_list_numbered,
+                            label: 'Available Units (Searched)',
+                            value: _formatSearchedUnit(bloodData),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildDetailRow(
+                            icon: Icons.check_circle_outline,
+                            label: 'Compatible Units',
+                            value: _formatCompatibleUnits(bloodData),
+                            maxLines: 3,
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          _buildMapLinksSection(context),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-            // Request Blood Button
+
+            SizedBox(height: screenHeight * 0.02),
+
             Container(
-              margin: const EdgeInsets.only(top: 16, bottom: 16),
+              margin: EdgeInsets.only(bottom: screenHeight * 0.02),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
@@ -166,13 +181,14 @@ class BloodBankDetails extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size(double.infinity, 50),
+                  padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.02),
+                  minimumSize: Size(double.infinity, screenHeight * 0.07),
                 ),
-                child: const Text(
+                child: Text(
                   'Request Blood',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: screenWidth * 0.045,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -220,6 +236,28 @@ class BloodBankDetails extends StatelessWidget {
       ],
     );
   }
+  String _formatSearchedUnit(Map<String, dynamic> data) {
+    final searched = data['availableUnits']?['searched'];
+    if (searched != null && searched is Map) {
+      final bloodGroup = searched['bloodGroup'] ?? 'Unknown';
+      final units = searched['units'] ?? 0;
+      return '$bloodGroup ($units)';
+    }
+    return 'N/A';
+  }
+
+  String _formatCompatibleUnits(Map<String, dynamic> data) {
+    final compatibleList = data['availableUnits']?['compatible'];
+    if (compatibleList != null && compatibleList is List) {
+      return compatibleList.map((e) {
+        final bloodGroup = e['bloodGroup'] ?? 'Unknown';
+        final units = e['units'] ?? 0;
+        return '$bloodGroup ($units)';
+      }).join(', ');
+    }
+    return 'N/A';
+  }
+
 
   Widget _buildMapButton({
     required String label,
