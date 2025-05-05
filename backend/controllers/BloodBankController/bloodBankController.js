@@ -44,8 +44,15 @@ exports.register = async (req, res) => {
       licenseDocumentUrl: null,
     });
 
+    const token = jwt.sign(
+      { id: bloodBank._id, role: "bloodbank" }, // ✅ include role here too
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
     res.status(201).json({
       msg: "Registration successful. Please upload your license certificate to complete the process.",
+      token,
       bloodBankId: bloodBank._id,
     });
 
