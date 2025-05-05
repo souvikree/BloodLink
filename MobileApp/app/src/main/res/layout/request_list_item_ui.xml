@@ -66,6 +66,7 @@
             android:layout_height="wrap_content"
             android:text="@string/requests"
             app:cornerRadius="13dp"
+            android:textColor="@color/white"
             android:backgroundTint="@color/red"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

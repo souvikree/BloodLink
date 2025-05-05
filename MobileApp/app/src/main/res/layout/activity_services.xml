@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/app_bacground_color_drawable"
+    tools:context=".Fragments.RequestPageBloodLink">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/RequestPageScreenToolBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/inter_bold"
+            android:text="@string/bloodlink"
+            android:textSize="24sp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/RequestPagenotificationButtonMainPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/rounded_square"
+            android:contentDescription="@string/notification_button_main_screen"
+            android:padding="5dp"
+            android:src="@drawable/baseline_notifications_24"
+
+            />
+
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:hint="@string/search"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxStrokeColor="#A48989"
+        app:boxBackgroundMode="outline"
+        app:layout_constraintTop_toBottomOf="@id/RequestPageScreenToolBar">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchBarRequestPage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColorHint="@color/black"
+            android:textColor="@color/black"
+            android:drawableStart="@drawable/baseline_search_24"
+            android:drawablePadding="10dp"
+            android:inputType="text"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/RequestsRecyclerViewRequestPage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchBarContainer"
+
+        />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

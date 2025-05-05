@@ -1,4 +1,5 @@
-
+import "@fontsource/poppins";
+import "@fontsource/roboto";
 export default function WhatIsBloodLink() {
     return (
         <section className="bg-gray-50 py-16 text-gray-900">

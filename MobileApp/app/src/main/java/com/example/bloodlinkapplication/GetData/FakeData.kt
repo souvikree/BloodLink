@@ -1,6 +1,8 @@
 package com.example.bloodlinkapplication.GetData
 
+import com.example.bloodlinkapplication.R
 import com.example.bloodlinkapplication.dateClass.BloodRequest
+import com.example.bloodlinkapplication.dateClass.Services
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -19,7 +21,7 @@ val bloodRequestsFakeData = listOf(
         "Urgent",
         "BLD-001",
         "New York City, NY",
-        "https://www.publicpreviews.com/stock-images/blood-donation-campaign-social-media-post-template-158438895.jpg"
+        "https://tse4.mm.bing.net/th?id=OIG4.EDX7MhIs_W846eQdCwIB&pid=ImgGn"
     )
     },
     formatter.parse("2024-10-25")?.let {
@@ -34,7 +36,7 @@ val bloodRequestsFakeData = listOf(
         "Critical",
         "BLD-002",
         "Los Angeles, CA",
-        "https://www.redcrossblood.org/content/dam/redcrossblood/blood-types/blood-donation-type-o-neg.jpg"
+        "https://tse3.mm.bing.net/th?id=OIG2.jHjvInQHA7NJSe7C3px0&pid=ImgGn"
     )
     },
     formatter.parse("2024-10-27")?.let {
@@ -49,7 +51,7 @@ val bloodRequestsFakeData = listOf(
         "High Priority",
         "BLD-003",
         "Chicago, IL",
-        "https://www.shutterstock.com/shutterstock/photos/2520821829/display_1500/stock-photo-halloween-pumpkin-on-abandoned-old-road-and-medieval-castle-on-the-background-2520821829.jpg"
+        "https://tse1.mm.bing.net/th?id=OIG3.NAr5M.oFvPTePGcq0sfm&pid=ImgGn"
     )
     },
     formatter.parse("2024-10-24")?.let {
@@ -79,7 +81,7 @@ val bloodRequestsFakeData = listOf(
         "Critical",
         "BLD-005",
         "Houston, TX",
-        "https://www.nhs.uk/conditions/blood-donations/why-donate-blood/"
+        "https://tse2.mm.bing.net/th?id=OIG4.Dt4E1aQZ7lnLGSn7vNSC&pid=ImgGn"
     )
     },
     formatter.parse("2024-10-23")?.let {
@@ -94,7 +96,7 @@ val bloodRequestsFakeData = listOf(
         "High Priority",
         "BLD-006",
         "Phoenix, AZ",
-        "https://www.versiti.org/blood-donation/blood-drives"
+        "https://tse2.mm.bing.net/th?id=OIG1.J3DOzS2I4oXIQ5hKasDd&pid=ImgGn"
     )
     },
     formatter.parse("2024-10-22")?.let {
@@ -109,7 +111,40 @@ val bloodRequestsFakeData = listOf(
             "Urgent",
             "BLD-007",
             "Seattle, WA",
-            "https://www.blood.ca/en/blood-donors/give-blood/eligibility"
+            "https://tse3.mm.bing.net/th?id=OIG2.0Pse951xzb_uHJlC7yoV&pid=ImgGn"
         )
     }
+
+)
+val servicesList = listOf(
+    Services(
+        title = "Find Donor",
+        description = "Instantly check real-time blood availability and nearby blood banks.",
+        image = R.drawable.bloodsearchicon // Replace with your drawable resource
+    ),
+    Services(
+        title = "Filter Blood",
+        description = "Quickly locate the required blood type with advanced filters.",
+        image = R.drawable.filter_icon // Replace with your drawable resource
+    ),
+    Services(
+        title = "Locate Help",
+        description = "View nearest blood banks and donors within a 7 km radius.",
+        image = R.drawable.baseline_help_24 // Replace with your drawable resource
+    ),
+    Services(
+        title = "Track Orders",
+        description = "Track your blood order from request to delivery with updates.",
+        image = R.drawable.blood_delivery_icon // Replace with your drawable resource
+    ),
+    Services(
+        title = "Reliable Delivery",
+        description = "Admin-coordinated secure blood transport for fast delivery.",
+        image = R.drawable.blood_donation_icon // Replace with your drawable resource
+    ),
+    Services(
+        title = "Join Community",
+        description = "Patients, donors, and blood banks enjoy seamless onboarding.",
+        image = R.drawable.blood_bank_community // Replace with your drawable resource
+    )
 )
