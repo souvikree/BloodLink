@@ -28,55 +28,55 @@ class HomeScreen extends StatelessWidget {
                   color: Color(0xFF212121),
                 ),
               ),
-              actions: [
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.chat_bubble,
-                      color: Color(0xFFDC2626), // Updated red color
-                      size: 20,
-                    ),
-                  ),
-                  onPressed: () {},
-                  tooltip: 'Chat',
-                ),
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.notifications,
-                      color: Color(0xFFDC2626), // Updated red color
-                      size: 20,
-                    ),
-                  ),
-                  onPressed: () {},
-                  tooltip: 'Notifications',
-                ),
-                const SizedBox(width: 10),
-              ],
+              // actions: [
+              //   // IconButton(
+              //   //   icon: Container(
+              //   //     padding: const EdgeInsets.all(6),
+              //   //     decoration: BoxDecoration(
+              //   //       color: Colors.white,
+              //   //       borderRadius: BorderRadius.circular(10),
+              //   //       boxShadow: [
+              //   //         BoxShadow(
+              //   //           color: Colors.black.withOpacity(0.1),
+              //   //           blurRadius: 4,
+              //   //           offset: const Offset(0, 2),
+              //   //         ),
+              //   //       ],
+              //   //     ),
+              //   //     child: const Icon(
+              //   //       Icons.chat_bubble,
+              //   //       color: Color(0xFFDC2626), // Updated red color
+              //   //       size: 20,
+              //   //     ),
+              //   //   ),
+              //   //   onPressed: () {},
+              //   //   tooltip: 'Chat',
+              //   // ),
+              //   IconButton(
+              //     icon: Container(
+              //       padding: const EdgeInsets.all(6),
+              //       decoration: BoxDecoration(
+              //         color: Colors.white,
+              //         borderRadius: BorderRadius.circular(10),
+              //         boxShadow: [
+              //           BoxShadow(
+              //             color: Colors.black.withOpacity(0.1),
+              //             blurRadius: 4,
+              //             offset: const Offset(0, 2),
+              //           ),
+              //         ],
+              //       ),
+              //       child: const Icon(
+              //         Icons.notifications,
+              //         color: Color(0xFFDC2626), // Updated red color
+              //         size: 20,
+              //       ),
+              //     ),
+              //     onPressed: () {},
+              //     tooltip: 'Notifications',
+              //   ),
+              //   const SizedBox(width: 10),
+              // ],
               backgroundColor: Colors.white,
               elevation: 0,
               shadowColor: Colors.black.withOpacity(0.2),
