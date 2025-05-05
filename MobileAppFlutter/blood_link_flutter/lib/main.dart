@@ -1,5 +1,7 @@
 import 'package:blood_link_flutter/main_screen.dart';
+import 'package:blood_link_flutter/provider/appointment_screen_provider.dart';
 import 'package:blood_link_flutter/provider/blood_bank_fetch_provider.dart';
+import 'package:blood_link_flutter/provider/profile_provider.dart';
 import 'package:blood_link_flutter/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => BloodBankFetchProvider()),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
         // Add more providers here as needed, e.g.:
         // ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],

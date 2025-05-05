@@ -3,6 +3,9 @@ import 'package:blood_link_flutter/provider/add_blood_order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../extra_functions.dart';
+import '../google_map_picker.dart';
+
 class AddOrderScreen extends StatelessWidget {
   final Map<String, dynamic>? bloodBank;
   static final _formKey = GlobalKey<FormState>();
@@ -431,7 +434,7 @@ class AddOrderScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color:
-                                      const Color(0xFFD32F2F).withOpacity(0.3),
+                                  const Color(0xFFD32F2F).withOpacity(0.3),
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -457,6 +460,46 @@ class AddOrderScreen extends StatelessWidget {
                                     horizontal: 16,
                                     vertical: 14,
                                   ),
+                                  suffixIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.my_location,
+                                          color: Color(0xFFD32F2F),
+                                        ),
+                                        onPressed: () =>
+                                            provider.fetchCurrentAddress(context),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.map,
+                                          color: Color(0xFFD32F2F),
+                                        ),
+                                        onPressed: () async {
+                                          if (provider.selectedBloodBank != null) {
+                                            final result = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MapPickerPage(
+                                                        bloodBankLocation: extractLatLng(
+                                                            provider
+                                                                .selectedBloodBank!['location'])),
+                                              ),
+                                            );
+                                            if (result != null &&
+                                                result is Map &&
+                                                result['address'] != null) {
+                                              provider.addressController.text =
+                                              result['address'] as String;
+                                            }
+                                          }
+                                        }
+                                      ),
+                                    ],
+                                  ),
+
                                 ),
                                 style: const TextStyle(
                                   fontSize: 16,
@@ -512,7 +555,7 @@ class AddOrderScreen extends StatelessWidget {
                                       ),
                                       child: Text(
                                         provider.prescriptionImage == null
-                                            ? 'Upload Prescription (Optional)'
+                                            ? 'Upload Prescription'
                                             : 'Change Prescription',
                                         style: const TextStyle(
                                           fontSize: 14,

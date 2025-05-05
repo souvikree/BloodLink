@@ -1,15 +1,18 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:blood_link_flutter/provider/blood_bank_fetch_provider.dart';
 import 'package:blood_link_flutter/search_blood_bank.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../order_confirmation_page.dart';
+import '../extra_functions.dart';
+import '../pages/order_confirmation_page.dart';
 
 class BloodOrderProvider with ChangeNotifier {
   Map<String, dynamic>? _selectedBloodBank;
@@ -36,18 +39,26 @@ class BloodOrderProvider with ChangeNotifier {
         initialBloodBank['availableUnits'] != null &&
         initialBloodBank['availableUnits']['searched'] != null) {
       _selectedBloodBank = initialBloodBank;
-      _selectedBloodGroup = initialBloodBank['availableUnits']['searched']['bloodGroup'] as String?;
+      _selectedBloodGroup = initialBloodBank['availableUnits']['searched']
+          ['bloodGroup'] as String?;
     }
   }
 
   // Getters
   Map<String, dynamic>? get selectedBloodBank => _selectedBloodBank;
+
   String? get selectedBloodGroup => _selectedBloodGroup;
+
   TextEditingController get quantityController => _quantityController;
+
   TextEditingController get addressController => _addressController;
+
   File? get prescriptionImage => _prescriptionImage;
+
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
+
   List<String> get bloodGroups => _bloodGroups;
 
   // Setters and actions
@@ -59,8 +70,30 @@ class BloodOrderProvider with ChangeNotifier {
     }
   }
 
-  Future<void> submitOrder(BuildContext context, GlobalKey<FormState> formKey) async {
+  Future<void> submitOrder(
+      BuildContext context, GlobalKey<FormState> formKey) async {
     if (!formKey.currentState!.validate()) return;
+
+    if (prescriptionImage == null) {
+      showCustomDialog(
+        context: context,
+        title: 'please select prescription',
+        message: 'Selecting prescription is not optional',
+        buttonText: 'Okay',
+        icon: Icons.image
+      );
+      return;
+    }
+    if (_selectedBloodBank == null) {
+      showCustomDialog(
+        context: context,
+        title: 'please select blood bank',
+        message: 'Selecting blood bank is not optional',
+        buttonText: 'Okay',
+        icon: Icons.bloodtype
+      );
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
@@ -69,7 +102,8 @@ class BloodOrderProvider with ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('authToken');
 
-      final uri = Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/place-order');
+      final uri = Uri.parse(
+          'https://bloodlink-flsd.onrender.com/api/patients/place-order');
 
       final request = http.MultipartRequest('POST', uri)
         ..headers['Authorization'] = 'Bearer $token'
@@ -114,8 +148,75 @@ class BloodOrderProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchCurrentAddress(BuildContext context) async {
+    try {
+      // Step 1: Check if Location Service is enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled.')),
+        );
+        return;
+      }
+
+      // Step 2: Check permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.always &&
+            permission != LocationPermission.whileInUse) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied.')),
+          );
+          return;
+        }
+      }
+
+      // Step 3: Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Step 4: Reverse geocoding
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final placemark = placemarks.first;
+
+        final address = [
+          placemark.street,
+          placemark.locality,
+          placemark.administrativeArea,
+          placemark.country
+        ].where((element) => element != null && element.isNotEmpty).join(', ');
+
+        // Set address in provider
+        addressController.text = address;
+
+        // Optional: Save lat/lng if needed
+        // provider.latitude = position.latitude;
+        // provider.longitude = position.longitude;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to fetch address.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching address: $e')),
+      );
+    }
+    notifyListeners();
+  }
+
   Future<void> selectBloodBank(BuildContext context) async {
-    context.read<BloodBankFetchProvider>().onBloodGroupChanged(_selectedBloodGroup ?? '');
+    context
+        .read<BloodBankFetchProvider>()
+        .onBloodGroupChanged(_selectedBloodGroup ?? '');
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -124,8 +225,10 @@ class BloodOrderProvider with ChangeNotifier {
     );
     if (result != null && result is Map<String, dynamic>) {
       _selectedBloodBank = result;
-      if (result['availableUnits'] != null && result['availableUnits']['searched'] != null) {
-        _selectedBloodGroup = result['availableUnits']['searched']['bloodGroup'] as String?;
+      if (result['availableUnits'] != null &&
+          result['availableUnits']['searched'] != null) {
+        _selectedBloodGroup =
+            result['availableUnits']['searched']['bloodGroup'] as String?;
       } else {
         _selectedBloodGroup = null;
       }
@@ -140,13 +243,15 @@ class BloodOrderProvider with ChangeNotifier {
 
   // Calculate total units
   int calculateTotalUnits() {
-    if (_selectedBloodBank == null || _selectedBloodBank!['availableUnits'] == null) return 0;
+    if (_selectedBloodBank == null ||
+        _selectedBloodBank!['availableUnits'] == null) return 0;
     int total = 0;
     final availableUnits = _selectedBloodBank!['availableUnits'];
     if (availableUnits['searched'] != null) {
       total += (availableUnits['searched']['units'] as num?)?.toInt() ?? 0;
     }
-    if (availableUnits['compatible'] != null && availableUnits['compatible'] is List) {
+    if (availableUnits['compatible'] != null &&
+        availableUnits['compatible'] is List) {
       for (var group in availableUnits['compatible']) {
         total += (group['units'] as num?)?.toInt() ?? 0;
       }

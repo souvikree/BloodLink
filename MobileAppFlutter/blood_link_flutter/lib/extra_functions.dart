@@ -1,3 +1,6 @@
+import 'package:blood_link_flutter/widgets/custom_animated_dialog.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/material.dart';
 Map<String, int> countBloodGroupType(Map<String, dynamic>? bloodBankSent) {
   final bloodGroupsData = bloodBankSent?['bloodGroups'] as List<dynamic>? ?? [];
 
@@ -13,6 +16,7 @@ Map<String, int> countBloodGroupType(Map<String, dynamic>? bloodBankSent) {
 
   return bloodGroupUnitMap;
 }
+
 int totalBloodBankUnit(Map<String, dynamic> bankData) {
   final availableUnits = bankData['availableUnits'];
   int totalUnits = 0;
@@ -34,4 +38,45 @@ int totalBloodBankUnit(Map<String, dynamic> bankData) {
   }
 
   return totalUnits;
+}
+
+LatLng extractLatLng(Map<String, dynamic> locationData) {
+  List coords = locationData['coordinates'];
+  double lng = coords[0]; // Longitude
+  double lat = coords[1]; // Latitude
+
+  return LatLng(lat, lng);
+}
+
+
+
+
+void showCustomDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required String buttonText,
+  IconData icon=Icons.check_circle, // Optional icon for customization
+  VoidCallback? onButtonPressed,
+  bool barrierDismissible = true,
+}) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: "Dismiss",
+    pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+    transitionBuilder: (_, anim, __, child) {
+      return Transform.scale(
+        scale: anim.value,
+        child: AnimatedDialog(
+          title: title,
+          message: message,
+          buttonText: "Okay",
+          icon: icon,
+        ),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+
 }

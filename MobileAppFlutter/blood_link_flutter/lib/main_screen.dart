@@ -3,7 +3,7 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 
 import 'home_screen.dart';
-import 'appointment_screen.dart';
+import 'pages/appointment_screen.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -17,9 +17,9 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
 
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    AppointmentScreen(),
+  final List<Widget> _pages = [
+    const HomeScreen(),
+    const AppointmentScreen(),
     ProfileScreen(),
   ];
 

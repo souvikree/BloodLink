@@ -10,27 +10,44 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
   final TextEditingController loginPhoneController = TextEditingController();
   final TextEditingController regNameController = TextEditingController();
   final TextEditingController regPhoneController = TextEditingController();
   bool isLoading = false;
-  late bool isDarkMode;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    isDarkMode = MediaQuery
-        .of(context)
-        .platformBrightness == Brightness.dark;
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _animationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    loginPhoneController.dispose();
+    regNameController.dispose();
+    regPhoneController.dispose();
+    super.dispose();
   }
 
   Future<void> sendLoginOtp() async {
+    print('is login possible login');
     setState(() => isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://bloodlink-flsd.onrender.com/api/patients/login/send-otp'),
+        Uri.parse('https://bloodlink-flsd.onrender.com/api/patients/login/send-otp'),
         body: jsonEncode({"mobile": loginPhoneController.text.trim()}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -40,12 +57,11 @@ class _AuthScreenState extends State<AuthScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                OtpVerificationScreen(
-                  phone: loginPhoneController.text,
-                  name: regNameController.text,
-                  isRegister: false,
-                ),
+            builder: (_) => OtpVerificationScreen(
+              phone: loginPhoneController.text,
+              name: regNameController.text,
+              isRegister: false,
+            ),
           ),
         );
       } else {
@@ -78,12 +94,11 @@ class _AuthScreenState extends State<AuthScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                OtpVerificationScreen(
-                  phone: regPhoneController.text,
-                  name: regNameController.text,
-                  isRegister: true,
-                ),
+            builder: (_) => OtpVerificationScreen(
+              phone: regPhoneController.text,
+              name: regNameController.text,
+              isRegister: true,
+            ),
           ),
         );
       } else {
@@ -101,48 +116,39 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double logoSize = MediaQuery.of(context).size.width * 0.2; // 20% of screen width
     return Theme(
-      data: isDarkMode ? _darkTheme : _lightTheme,
+      data: _lightTheme,
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(logoSize + 60), // Adjust height for logo and tabs
+            child: AppBar(
+              automaticallyImplyLeading: false,
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Image.asset(
                   'asset/images/bloodlinklogo.png',
-                  height: 40,
-                  width: 40,
+                  height: logoSize,
+                  width: logoSize,
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  'BloodLink',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.redAccent,
-                  ),
-                ),
-              ],
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
-                onPressed: () => setState(() => isDarkMode = !isDarkMode),
               ),
-            ],
-            bottom: TabBar(
-              indicatorColor: Colors.redAccent,
-              labelColor: isDarkMode ? Colors.white : Colors.redAccent,
-              unselectedLabelColor: isDarkMode ? Colors.grey[400] : Colors
-                  .grey[600],
-              tabs: const [
-                Tab(text: "Login"),
-                Tab(text: "Register"),
-              ],
+              centerTitle: true,
+              elevation: 4,
+              backgroundColor: Colors.white.withOpacity(0.9),
+              bottom: const TabBar(
+                indicatorColor: Colors.redAccent,
+                indicatorWeight: 3,
+                labelColor: Colors.redAccent,
+                unselectedLabelColor: Colors.grey,
+                labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                labelPadding: EdgeInsets.symmetric(vertical: 10),
+                tabs: [
+                  Tab(text: "Login"),
+                  Tab(text: "Register"),
+                ],
+              ),
             ),
           ),
           body: isLoading
@@ -152,9 +158,7 @@ class _AuthScreenState extends State<AuthScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: isDarkMode
-                    ? [Colors.grey[900]!, Colors.grey[800]!]
-                    : [Colors.white, Colors.grey[100]!],
+                colors: [Colors.white, Colors.grey[200]!],
               ),
             ),
             child: TabBarView(
@@ -172,47 +176,41 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildLoginTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              Text(
-                'Welcome Back',
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Card(
+          elevation: 6,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                Text(
+                  'Welcome Back',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: loginPhoneController,
-                decoration: InputDecoration(
-                  labelText: "Phone Number",
-                  prefixIcon: const Icon(Icons.phone),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
+                const SizedBox(height: 24),
+                TextField(
+                  controller: loginPhoneController,
+                  decoration: InputDecoration(
+                    labelText: "Phone Number",
+                    prefixIcon: const Icon(Icons.phone),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  keyboardType: TextInputType.phone,
                 ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: sendLoginOtp,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                const SizedBox(height: 24),
+                AnimatedScaleButton(
+                  onPressed: sendLoginOtp,
+                  child: const Text("Send OTP", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
-                child: const Text("Send OTP", style: TextStyle(fontSize: 16)),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -222,59 +220,52 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildRegisterTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              Text(
-                'Join BloodLink',
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(
-                  color: Colors.redAccent,
-                  fontWeight: FontWeight.bold,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Card(
+          elevation: 6,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                Text(
+                  'Join BloodLink',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: regNameController,
-                decoration: InputDecoration(
-                  labelText: "Name",
-                  prefixIcon: const Icon(Icons.person),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
+                const SizedBox(height: 24),
+                TextField(
+                  controller: regNameController,
+                  decoration: InputDecoration(
+                    labelText: "Name",
+                    prefixIcon: const Icon(Icons.person),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: regPhoneController,
-                decoration: InputDecoration(
-                  labelText: "Phone Number",
-                  prefixIcon: const Icon(Icons.phone),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
+                const SizedBox(height: 16),
+                TextField(
+                  controller: regPhoneController,
+                  decoration: InputDecoration(
+                    labelText: "Phone Number",
+                    prefixIcon: const Icon(Icons.phone),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  keyboardType: TextInputType.phone,
                 ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: registerAndSendOtp,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                const SizedBox(height: 24),
+                AnimatedScaleButton(
+                  onPressed: registerAndSendOtp,
+                  child: const Text("Register & Send OTP", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
-                child: const Text(
-                    "Register & Send OTP", style: TextStyle(fontSize: 16)),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -286,60 +277,107 @@ class _AuthScreenState extends State<AuthScreen> {
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       elevation: 0,
-      titleTextStyle: TextStyle(
-          color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+      titleTextStyle: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
       iconTheme: IconThemeData(color: Colors.black),
     ),
     cardColor: Colors.white,
     inputDecorationTheme: InputDecorationTheme(
       fillColor: Colors.grey[100],
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-    ),
-  );
-
-  final ThemeData _darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Colors.redAccent,
-    scaffoldBackgroundColor: Colors.black,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      titleTextStyle: TextStyle(
-          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-      iconTheme: IconThemeData(color: Colors.white),
-    ),
-    cardColor: Colors.grey[850],
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.white70),
-      bodyLarge: TextStyle(color: Colors.white),
-      titleLarge: TextStyle(color: Colors.white),
-      labelLarge: TextStyle(color: Colors.white),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.grey[800],
-      labelStyle: const TextStyle(color: Colors.white70),
-      prefixIconColor: Colors.white70,
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white38),
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.redAccent),
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Colors.redAccent),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
         backgroundColor: Colors.redAccent,
-        textStyle: const TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
   );
+}
+
+// Custom widget for animated button with gradient and scale effect
+class AnimatedScaleButton extends StatefulWidget {
+  final VoidCallback onPressed;
+  final Widget child;
+
+  const AnimatedScaleButton({super.key, required this.onPressed, required this.child});
+
+  @override
+  _AnimatedScaleButtonState createState() => _AnimatedScaleButtonState();
+}
+
+class _AnimatedScaleButtonState extends State<AnimatedScaleButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap:  ()=>widget.onPressed(),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.redAccent, Colors.red.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => widget.onPressed(),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                ),
+                child: widget.child,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }

@@ -63,7 +63,6 @@ class OrderDetailsPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    // Inside the Column of the Card
                     children: [
                       const Text('Order Information', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF212121))),
                       Container(margin: const EdgeInsets.only(top: 8, bottom: 16), height: 3, width: 60, color: const Color(0xFFD32F2F)),
@@ -103,56 +102,43 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              if(order['status']!='cancelled')
-              Container(
-                margin: const EdgeInsets.only(top: 16, bottom: 16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+              if(order['status'] != 'cancelled')
+                Container(
+                  margin: const EdgeInsets.only(top: 16, bottom: 16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFD32F2F).withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD32F2F).withOpacity(0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final orderId = order['_id'];
+                      if (orderId != null) {
+                        await cancelOrder(orderId, context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order ID is not available.')));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final orderId = order['_id'];
-                    if (orderId != null) {
-                      await cancelOrder(orderId,context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Order ID is not available.'),
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text(
-                    'Cancel Order',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    child: const Text('Cancel Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -188,22 +174,14 @@ class OrderDetailsPage extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]),
               ),
               const SizedBox(height: 4),
               Tooltip(
                 message: value,
                 child: Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF212121),
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF212121)),
                   maxLines: maxLines,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -246,22 +224,14 @@ class OrderDetailsPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     prescription?.isNotEmpty == true
                         ? 'View Document'
                         : 'No document provided',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF212121),
-                    ),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF212121)),
                   ),
                 ],
               ),
@@ -274,17 +244,13 @@ class OrderDetailsPage extends StatelessWidget {
             onTap: () {
               showDialog(
                 context: context,
-                builder: (context) => FullScreenImageDialog(
-                  imagePath: prescription,
-                ),
+                builder: (context) => FullScreenImageDialog(imagePath: prescription),
               );
             },
             child: Container(
               height: 150,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color(0xFFD32F2F).withOpacity(0.3),
-                ),
+                border: Border.all(color: const Color(0xFFD32F2F).withOpacity(0.3)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ClipRRect(
@@ -299,20 +265,19 @@ class OrderDetailsPage extends StatelessWidget {
   }
 
   Widget _buildPrescriptionImage(String prescription) {
-      return Image.network(
-        prescription,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey[200],
-          child: const Icon(
-            Icons.broken_image,
-            size: 50,
-            color: Colors.grey,
-          ),
+    return Image.network(
+      prescription,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      errorBuilder: (context, error, stackTrace) => Container(
+        color: Colors.grey[200],
+        child: const Icon(
+          Icons.broken_image,
+          size: 50,
+          color: Colors.grey,
         ),
-      );
-
+      ),
+    );
   }
 }
 

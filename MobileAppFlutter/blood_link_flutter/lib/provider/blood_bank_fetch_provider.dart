@@ -25,9 +25,11 @@ class BloodBankFetchProvider extends ChangeNotifier {
     _loadLastSearchedBloodGroup();
   }
 
-  void updateBloodGroup(String group){
-    selectedBloodGroup=group;
-    notifyListeners();
+  void updateBloodGroup(String group) {
+    if (bloodGroups.contains(group)) {
+      selectedBloodGroup = group;
+      notifyListeners();
+    }
   }
 
   Future<void> _loadLastSearchedBloodGroup() async {
@@ -35,21 +37,25 @@ class BloodBankFetchProvider extends ChangeNotifier {
     final lastSearched = prefs.getString('selectedBloodGroup');
     if (lastSearched != null && bloodGroups.contains(lastSearched)) {
       selectedBloodGroup = lastSearched;
-      notifyListeners();
+    } else {
+      selectedBloodGroup = null; // Reset to null if invalid
+      await prefs.remove('selectedBloodGroup'); // Clear invalid value
     }
+    notifyListeners();
     await fetchNearbyBloodBanks();
   }
 
   Future<void> onBloodGroupChanged(String? newValue) async {
     final prefs = await SharedPreferences.getInstance();
-    selectedBloodGroup = newValue;
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
-    if (newValue != null) {
+    if (newValue != null && bloodGroups.contains(newValue)) {
+      selectedBloodGroup = newValue;
       await prefs.setString('selectedBloodGroup', newValue);
     } else {
+      selectedBloodGroup = null;
       await prefs.remove('selectedBloodGroup');
     }
     await fetchNearbyBloodBanks();

@@ -8,13 +8,16 @@ class OrderConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get device width for responsiveness
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text(
           'Order Confirmed',
           style: GoogleFonts.poppins(
-            fontSize: 24,
+            fontSize: width * 0.06, // Responsive font size
             fontWeight: FontWeight.w700,
             color: const Color(0xFF212121),
           ),
@@ -23,9 +26,10 @@ class OrderConfirmationScreen extends StatelessWidget {
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.2),
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: Color(0xFFE91E63),
+            color: const Color(0xFFE91E63),
+            size: width * 0.07, // Responsive icon size
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -35,14 +39,14 @@ class OrderConfirmationScreen extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(width * 0.05), // Responsive padding
         child: SingleChildScrollView(
           child: Column(
             children: [
               // Success Checkmark
               Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                padding: const EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: width * 0.05),
+                padding: EdgeInsets.all(width * 0.04),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
@@ -56,16 +60,17 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check,
                   color: Colors.white,
-                  size: 40,
+                  size: width * 0.1, // Responsive icon
                 ),
               ),
 
               // Order Status Card
               _buildInfoCard(
                 context,
+                width,
                 'Order Status',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,13 +80,14 @@ class OrderConfirmationScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.info_outline,
-                                color: Color(0xFFE91E63), size: 20),
-                            const SizedBox(width: 8),
+                            Icon(Icons.info_outline,
+                                color: const Color(0xFFE91E63),
+                                size: width * 0.05),
+                            SizedBox(width: width * 0.02),
                             Text(
                               'Order Status',
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: width * 0.04,
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF212121),
                               ),
@@ -94,38 +100,39 @@ class OrderConfirmationScreen extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
-                              fontSize: 12,
+                              fontSize: width * 0.03,
                             ),
                           ),
                           backgroundColor: orderData['status'] == 'pending'
                               ? const Color(0xFFE91E63)
                               : const Color(0xFF4CAF50),
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.02),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: width * 0.03),
                     Row(
                       children: [
-                        const Icon(Icons.account_balance_wallet,
-                            size: 20, color: Color(0xFFE91E63)),
-                        const SizedBox(width: 8),
+                        Icon(Icons.account_balance_wallet,
+                            size: width * 0.05, color: const Color(0xFFE91E63)),
+                        SizedBox(width: width * 0.02),
                         Text(
                           'Pay on Delivery',
                           style: GoogleFonts.poppins(
                             color: const Color(0xFF4CAF50),
-                            fontSize: 14,
+                            fontSize: width * 0.035,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: width * 0.02),
                     Text(
                       'Order ID: ${orderData['_id'] ?? 'N/A'}',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: width * 0.035,
                       ),
                     ),
                   ],
@@ -136,6 +143,7 @@ class OrderConfirmationScreen extends StatelessWidget {
               // Blood Bank Details
               _buildInfoCard(
                 context,
+                width,
                 'Blood Bank',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,11 +154,11 @@ class OrderConfirmationScreen extends StatelessWidget {
                           ? orderData['bloodBank']['name'] ?? 'Unknown Bank'
                           : 'Unknown Bank',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: width * 0.04,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: width * 0.02),
                     Text(
                       orderData['bloodBank'] != null &&
                           orderData['bloodBank'] is Map
@@ -158,7 +166,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                           : 'No address',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: width * 0.035,
                       ),
                     ),
                     Text(
@@ -168,7 +176,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                           : 'License: N/A',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: width * 0.035,
                       ),
                     ),
                   ],
@@ -179,26 +187,22 @@ class OrderConfirmationScreen extends StatelessWidget {
               // Order Details
               _buildInfoCard(
                 context,
+                width,
                 'Order Details',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailRow(
-                      'Blood Type',
-                      orderData['bloodType'] ?? 'N/A',
-                      icon: Icons.bloodtype,
-                    ),
+                        width, 'Blood Type', orderData['bloodType'] ?? 'N/A',
+                        icon: Icons.bloodtype),
+                    _buildDetailRow(width, 'Quantity',
+                        '${orderData['quantity'] ?? 0} units',
+                        icon: Icons.format_list_numbered),
+                    _buildDetailRow(width, 'Delivery Address',
+                        orderData['deliveryAddress'] ?? 'N/A',
+                        icon: Icons.location_on),
                     _buildDetailRow(
-                      'Quantity',
-                      '${orderData['quantity'] ?? 0} units',
-                      icon: Icons.format_list_numbered,
-                    ),
-                    _buildDetailRow(
-                      'Delivery Address',
-                      orderData['deliveryAddress'] ?? 'N/A',
-                      icon: Icons.location_on,
-                    ),
-                    _buildDetailRow(
+                      width,
                       'Requested At',
                       orderData['requestedAt'] != null
                           ? DateTime.parse(orderData['requestedAt'])
@@ -216,27 +220,21 @@ class OrderConfirmationScreen extends StatelessWidget {
               // Charges Section
               _buildInfoCard(
                 context,
+                width,
                 'Charges',
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow(
-                      'Handling Charge',
-                      '₹${orderData['handlingCharge'] ?? 0}',
-                      icon: Icons.monetization_on,
-                    ),
-                    _buildDetailRow(
-                      'Service Charge',
-                      '₹${orderData['serviceCharge'] ?? 0}',
-                      icon: Icons.receipt,
-                    ),
+                    _buildDetailRow(width, 'Handling Charge',
+                        '₹${orderData['handlingCharge'] ?? 0}',
+                        icon: Icons.monetization_on),
+                    _buildDetailRow(width, 'Service Charge',
+                        '₹${orderData['serviceCharge'] ?? 0}',
+                        icon: Icons.receipt),
                     const Divider(color: Colors.grey),
-                    _buildDetailRow(
-                      'Total Price',
-                      '₹${orderData['totalPrice'] ?? 0}',
-                      isBold: true,
-                      icon: Icons.payment,
-                    ),
+                    _buildDetailRow(width, 'Total Price',
+                        '₹${orderData['totalPrice'] ?? 0}',
+                        isBold: true, icon: Icons.payment),
                   ],
                 ),
                 icon: Icons.attach_money,
@@ -245,7 +243,7 @@ class OrderConfirmationScreen extends StatelessWidget {
               // Prescription Image
               if (orderData['prescriptionUrl'] != null)
                 Container(
-                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  margin: EdgeInsets.symmetric(vertical: width * 0.04),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(16),
@@ -266,7 +264,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                       placeholder: 'assets/images/placeholder.png',
                       image: orderData['prescriptionUrl'],
                       fit: BoxFit.cover,
-                      height: 220,
+                      height: width * 0.6, // responsive height
                       width: double.infinity,
                       fadeInDuration: const Duration(milliseconds: 500),
                     ),
@@ -277,7 +275,7 @@ class OrderConfirmationScreen extends StatelessWidget {
               Hero(
                 tag: 'done_button',
                 child: Container(
-                  margin: const EdgeInsets.only(top: 24),
+                  margin: EdgeInsets.only(top: width * 0.06),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFE91E63), Color(0xFFD81B60)],
@@ -294,23 +292,23 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context,true),
+                    onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 18,
-                        horizontal: 32,
+                      padding: EdgeInsets.symmetric(
+                        vertical: width * 0.045,
+                        horizontal: width * 0.08,
                       ),
-                      minimumSize: const Size(double.infinity, 56),
+                      minimumSize: Size(double.infinity, width * 0.14),
                     ),
                     child: Text(
                       'Done',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: width * 0.045,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -326,11 +324,12 @@ class OrderConfirmationScreen extends StatelessWidget {
   }
 
   Widget _buildInfoCard(
-      BuildContext context, String title, Widget content, {IconData? icon}) {
+      BuildContext context, double width, String title, Widget content,
+      {IconData? icon}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.only(bottom: width * 0.04),
+      padding: EdgeInsets.all(width * 0.045),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
@@ -351,58 +350,69 @@ class OrderConfirmationScreen extends StatelessWidget {
           Row(
             children: [
               if (icon != null) ...[
-                Icon(icon, color: const Color(0xFFE91E63), size: 20),
-                const SizedBox(width: 8),
+                Icon(icon, color: const Color(0xFFE91E63), size: width * 0.05),
+                SizedBox(width: width * 0.02),
               ],
               Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: width * 0.045,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF212121),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: width * 0.03),
           content,
         ],
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value,
+  Widget _buildDetailRow(
+      double width, String label, String value,
       {bool isBold = false, IconData? icon}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: width * 0.015),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start, // Align top if text wraps
         children: [
           Row(
             children: [
               if (icon != null) ...[
-                Icon(icon, color: const Color(0xFFE91E63), size: 18),
-                const SizedBox(width: 8),
+                Icon(icon, color: const Color(0xFFE91E63), size: width * 0.045),
+                SizedBox(width: width * 0.02),
               ],
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                  color: Colors.grey[600],
-                  fontSize: 14,
+                  fontSize: width * 0.035,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF212121),
                 ),
               ),
             ],
           ),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
-              fontSize: 14,
-              color: const Color(0xFF212121),
+          // Wrap value text inside Flexible for overflow
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end, // align right
+              overflow: TextOverflow.ellipsis, // show ...
+              maxLines: 1, // only 1 line
+              style: GoogleFonts.poppins(
+                fontSize: width * 0.035,
+                fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+                color: isBold ? const Color(0xFF212121) : Colors.grey[700],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
 }

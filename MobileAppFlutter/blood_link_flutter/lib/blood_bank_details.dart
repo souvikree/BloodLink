@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'add_order_screen.dart';
+import 'pages/add_order_screen.dart';
 import 'extra_functions.dart';
 
 class BloodBankDetails extends StatelessWidget {
