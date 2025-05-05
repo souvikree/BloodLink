@@ -81,8 +81,9 @@ const services = [
   },
   { 
     id: 9,
-    title: "Join a Life-Saving Community", 
-    description: "Patients, donors, and blood banks enjoy a seamless registration and onboarding experience.",
+    title: "Connect to Care:", 
+    //description: "Patients, donors, and blood banks enjoy a seamless registration and onboarding experience.",
+    description:"Join a Life-Saving Community, Empower Every Drop.",
     bgColor: "#F2E7E7",
     colSpan: "col-span-6 md:col-span-2",
     rowSpan: "row-span-1",
@@ -147,7 +148,7 @@ const ServiceCard = ({ service }) => {
             </div>
           </>
         ) : (
-         
+        
           <>
             <img 
               src={service.imgSrc} 
