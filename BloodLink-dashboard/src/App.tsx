@@ -22,7 +22,7 @@ import NavbarPublic from "./components/layout/NavbarPublic";
 const queryClient = new QueryClient();
 
 // Mock authentication - would be replaced with real auth
-const isAuthenticated = true; // Change to false to test auth flow
+const isAuthenticated = false; // Change to false to test auth flow
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

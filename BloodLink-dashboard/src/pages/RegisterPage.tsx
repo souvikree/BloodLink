@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import api from "@/utils/api";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -25,16 +26,24 @@ const RegisterPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const response = await api.post("/api/bloodbanks/register", formData);
+            console.log("Registration successful:", response.data);
+
+            // Navigate on success
             navigate("/license-upload");
-        }, 1000);
+        } catch (error: any) {
+            console.error("Error during registration:", error?.response?.data || error.message);
+            alert("Registration failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary/40 p-4">
