@@ -108,6 +108,10 @@ exports.updateProfile = async (req, res) => {
 
 exports.addInventory = async (req, res) => {
   try {
+    // 👇 Ensure user is authenticated
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: Token missing or invalid." });
+    }
     const { bloodGroup, quantity, donorId, expiryDate } = req.body;
     const bloodBankId = req.user.id;
 
