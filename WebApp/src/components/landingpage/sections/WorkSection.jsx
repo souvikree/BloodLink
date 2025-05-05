@@ -1,4 +1,6 @@
 import React from "react";
+import "@fontsource/poppins";
+import "@fontsource/roboto";
 
 const works = [
     {
@@ -34,9 +36,9 @@ const works = [
 export default function WorkSection() {
     return (
         <section className="bg-[#F4F4ED] text-black py-12 px-6 md:px-10 min-h-screen">
-            <div className="container mx-auto">
-                <h2 className="text-3xl font-bold mb-4 text-center">Our Work</h2>
-                <p className="text-black mb-8 text-center">
+            <div className="container mx-auto " >
+                <h2 className="text-3xl font-bold mb-4 text-center" style={{ fontFamily: "Poppins, sans-serif" }}>Our Work</h2>
+                <p className="text-black mb-8 text-center" style={{ fontFamily: "Poppins, sans-serif" }}>
                     We engage in various initiatives to support healthcare and blood donation awareness, making a meaningful impact in communities.
                 </p>
 
@@ -54,8 +56,8 @@ export default function WorkSection() {
 
                             {/* Text Section */}
                             <div className="w-2/3 p-6">
-                                <h3 className="text-xl font-semibold mb-2">{work.title}</h3>
-                                <p className="text-gray-700 mb-3">{work.description}</p>
+                                <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>{work.title}</h3>
+                                <p className="text-gray-700 mb-3"  style={{ fontFamily: "Roboto, sans-serif" }}>{work.description}</p>
                                 <p className="text-gray-400 font-semibold">
                                     Impact: <span className="text-gray-600">{work.impact}</span>
                                 </p>

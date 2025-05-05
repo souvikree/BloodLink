@@ -37,31 +37,45 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <com.google.android.material.search.SearchBar
-        android:id="@+id/searchBarRequestPage"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchBarContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:backgroundTint="#A48989"
-        app:layout_constraintTop_toBottomOf="@id/RequestPageScreenToolBar"
+        android:hint="@string/search"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxStrokeColor="#A48989"
+        app:boxBackgroundMode="outline"
+        app:layout_constraintTop_toBottomOf="@id/RequestPageScreenToolBar">
 
-        />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchBarRequestPage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textColorHint="@color/black"
+            android:textColor="@color/black"
+            android:drawableStart="@drawable/baseline_search_24"
+            android:drawablePadding="10dp"
+            android:inputType="text"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RequestsRecyclerViewRequestPage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="50dp"
-        app:layout_constraintTop_toBottomOf="@id/searchBarRequestPage"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchBarContainer"
         tools:listitem="@layout/request_list_item_ui"
         />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintHeight_percent="1"
-        app:layout_constraintBottom_toTopOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
