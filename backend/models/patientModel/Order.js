@@ -28,4 +28,7 @@ const orderSchema = new mongoose.Schema({
   requestedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
+orderSchema.index({ patient: 1, createdAt: -1 });
+
+
 module.exports = mongoose.model('Order', orderSchema);
