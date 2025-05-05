@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math' as math;
+
 
 class OrderDetailsPage extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -11,6 +14,7 @@ class OrderDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isOrderCancel= order['status'] == 'cancelled';
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -40,108 +44,129 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFFD32F2F).withOpacity(0.3),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: (isOrderCancel) ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    borderRadius: BorderRadius.circular(15),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFFD32F2F).withOpacity(0.3),
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('Order Information', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF212121))),
+
+                              SizedBox(width: 8),
+                              if(isOrderCancel) Text(
+                                '[Order cancelled]',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold, // Optional for emphasis
+                                ),
+                              )
+
+                            ],
+                            
+                          ),
+                          Container(margin: const EdgeInsets.only(top: 8, bottom: 16), height: 3, width: 60, color: const Color(0xFFD32F2F)),
+                          _buildDetailRow(icon: Icons.assignment, label: 'Order ID', value: order['_id'] ?? 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.person, label: 'Patient ID', value: order['patient'] ?? 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.bloodtype, label: 'Blood Type', value: order['bloodType'] ?? 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.format_list_numbered, label: 'Quantity', value: order['quantity'] != null ? '${order['quantity']} units' : 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.location_on, label: 'Delivery Address', value: order['deliveryAddress'] ?? 'N/A', maxLines: 2),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.local_hospital, label: 'Blood Bank Name', value: order['bloodBank']?['name'] ?? 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.location_on, label: 'Blood Bank Address', value: order['bloodBank']?['address'] ?? 'N/A', maxLines: 2),
+                          const SizedBox(height: 16),
+                          InkWell(
+                            onTap: () async {
+                              final String? contactNumber = order['bloodBank']?['contactNumber']?.toString();
+                              if (contactNumber != null && contactNumber.isNotEmpty) {
+                                await FlutterPhoneDirectCaller.callNumber(contactNumber);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact number is not available.')));
+                              }
+                            },
+                            child: _buildDetailRow(icon: Icons.phone, label: 'Contact Number', value: order['bloodBank']?['contactNumber']?.toString() ?? 'N/A'),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildPrescriptionRow(context: context, icon: Icons.description, label: 'Prescription Document', prescription: order['prescriptionUrl']),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.payment, label: 'Payment Status', value: order['paymentStatus']?.toUpperCase() ?? 'N/A'),
+                          const SizedBox(height: 16),
+                          _buildDetailRow(icon: Icons.account_balance_wallet, label: 'Total Price', value: order['totalPrice'] != null ? '₹${order['totalPrice'].toStringAsFixed(2)}' : 'N/A'),
+                        ],
+                      ),
+                    ),
                   ),
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('Order Information', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF212121))),
-                      Container(margin: const EdgeInsets.only(top: 8, bottom: 16), height: 3, width: 60, color: const Color(0xFFD32F2F)),
-                      _buildDetailRow(icon: Icons.assignment, label: 'Order ID', value: order['_id'] ?? 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.person, label: 'Patient ID', value: order['patient'] ?? 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.bloodtype, label: 'Blood Type', value: order['bloodType'] ?? 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.format_list_numbered, label: 'Quantity', value: order['quantity'] != null ? '${order['quantity']} units' : 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.location_on, label: 'Delivery Address', value: order['deliveryAddress'] ?? 'N/A', maxLines: 2),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.local_hospital, label: 'Blood Bank Name', value: order['bloodBank']?['name'] ?? 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.location_on, label: 'Blood Bank Address', value: order['bloodBank']?['address'] ?? 'N/A', maxLines: 2),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () async {
-                          final String? contactNumber = order['bloodBank']?['contactNumber']?.toString();
-                          if (contactNumber != null && contactNumber.isNotEmpty) {
-                            await FlutterPhoneDirectCaller.callNumber(contactNumber);
+                  const SizedBox(height: 16),
+                  if(order['status'] != 'cancelled')
+                    Container(
+                      margin: const EdgeInsets.only(top: 16, bottom: 16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFD32F2F).withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final orderId = order['_id'];
+                          if (orderId != null) {
+                            await cancelOrder(orderId, context);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contact number is not available.')));
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order ID is not available.')));
                           }
                         },
-                        child: _buildDetailRow(icon: Icons.phone, label: 'Contact Number', value: order['bloodBank']?['contactNumber']?.toString() ?? 'N/A'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        child: const Text('Cancel Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                       ),
-                      const SizedBox(height: 16),
-                      _buildPrescriptionRow(context: context, icon: Icons.description, label: 'Prescription Document', prescription: order['prescriptionUrl']),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.payment, label: 'Payment Status', value: order['paymentStatus']?.toUpperCase() ?? 'N/A'),
-                      const SizedBox(height: 16),
-                      _buildDetailRow(icon: Icons.account_balance_wallet, label: 'Total Price', value: order['totalPrice'] != null ? '₹${order['totalPrice'].toStringAsFixed(2)}' : 'N/A'),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 16),
-              if(order['status'] != 'cancelled')
-                Container(
-                  margin: const EdgeInsets.only(top: 16, bottom: 16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFD32F2F).withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final orderId = order['_id'];
-                      if (orderId != null) {
-                        await cancelOrder(orderId, context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order ID is not available.')));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text('Cancel Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
-                  ),
-                ),
-            ],
+            ),
           ),
-        ),
+          if(isOrderCancel) const CancelledStamp()
+        ],
       ),
     );
   }
@@ -426,4 +451,328 @@ class FullScreenImageDialog extends StatelessWidget {
       );
     }
   }
+}
+
+class CancelledStamp extends StatelessWidget {
+  const CancelledStamp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FadeIn(
+        duration: const Duration(milliseconds: 800),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Uneven circle base
+            CustomPaint(
+              painter: _UnevenCirclePainter(),
+              size: const Size(260, 260),
+            ),
+            // Inner content
+            SizedBox(
+              width: 260,
+              height: 260,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Inner embossed circle for depth
+                  Container(
+                    width: 240,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF3E0000).withOpacity(0.9),
+                          Colors.red[900]!.withOpacity(0.85),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 12,
+                          offset: const Offset(4, 4),
+                          spreadRadius: -2,
+                        ),
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.15),
+                          blurRadius: 12,
+                          offset: const Offset(-4, -4),
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Background texture
+                  CustomPaint(
+                    painter: _StampTexturePainter(),
+                    size: const Size(240, 240),
+                  ),
+                  // Outer circular text with enhanced 3D effect
+                  _buildCircularText(
+                    text: 'CANCELLED • BLOOD LINK AUTHORITY •',
+                    radius: 100,
+                    textStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white.withOpacity(0.9),
+                      letterSpacing: 1.5,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.7),
+                          blurRadius: 6,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Inner circular text with enhanced 3D effect
+                  _buildCircularText(
+                    text: 'CANCELLED • CHOICE NOT BLOOD LINK •',
+                    radius: 80,
+                    textStyle: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.7),
+                      letterSpacing: 1,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.6),
+                          blurRadius: 5,
+                          offset: const Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Central emblem (Ashoka Chakra-inspired) with enhanced 3D effect
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          Colors.white.withOpacity(0.2),
+                          Colors.white.withOpacity(0.05),
+                        ],
+                        center: Alignment.center,
+                        radius: 0.8,
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.6),
+                        width: 4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 8,
+                          offset: const Offset(3, 3),
+                        ),
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(-3, -3),
+                        ),
+                      ],
+                    ),
+                    child: CustomPaint(
+                      painter: _AshokaChakraPainter(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircularText({
+    required String text,
+    required double radius,
+    required TextStyle textStyle,
+  }) {
+    return CustomPaint(
+      painter: _CircularTextPainter(
+        text: text,
+        radius: radius,
+        textStyle: textStyle,
+      ),
+      size: Size(radius * 2, radius * 2),
+    );
+  }
+}
+
+class _UnevenCirclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    const baseRadius = 130.0;
+    final path = Path();
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          Colors.red[900]!.withOpacity(0.95),
+          const Color(0xFF3E0000).withOpacity(0.9),
+        ],
+        center: Alignment.center,
+        radius: 0.7,
+      ).createShader(Rect.fromCircle(center: center, radius: baseRadius))
+      ..style = PaintingStyle.fill;
+
+    // Create uneven edge by varying the radius with a sine wave
+    const segments = 100;
+    const amplitude = 5.0; // How much the edge varies
+    const frequency = 10; // How many waves around the circle
+    for (int i = 0; i <= segments; i++) {
+      final angle = (i / segments) * 2 * math.pi;
+      final radiusVariation = amplitude * math.sin(frequency * angle);
+      final radius = baseRadius + radiusVariation;
+      final x = center.dx + radius * math.cos(angle);
+      final y = center.dy + radius * math.sin(angle);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+
+    // Draw the uneven circle with shadow for 3D effect
+    canvas.drawShadow(path, Colors.black.withOpacity(0.6), 16, false);
+    canvas.drawPath(path, paint);
+
+    // Draw the border
+    final borderPaint = Paint()
+      ..color = const Color(0xFF3E0000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10;
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _StampTexturePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    for (double i = 0; i < size.width; i += 8) {
+      for (double j = 0; j < size.height; j += 8) {
+        canvas.drawCircle(Offset(i, j), 1.5, paint);
+      }
+    }
+
+    // Add subtle radial lines for texture
+    final center = Offset(size.width / 2, size.height / 2);
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..strokeWidth = 0.8;
+    for (int i = 0; i < 36; i++) {
+      final angle = (i * 10) * (math.pi / 180);
+      final end = center + Offset(math.cos(angle) * (size.width / 2), math.sin(angle) * (size.width / 2));
+      canvas.drawLine(center, end, linePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _AshokaChakraPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    const spokes = 24;
+    const radius = 25.0;
+
+    // Draw outer blue circle
+    final outerCirclePaint = Paint()
+      ..color = Colors.blue[900]!
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius, outerCirclePaint);
+
+    // Draw spokes with slight shadow for 3D effect
+    final spokePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    for (int i = 0; i < spokes; i++) {
+      final angle = (i * 360 / spokes) * (math.pi / 180);
+      final start = center;
+      final end = center + Offset(math.cos(angle) * radius, math.sin(angle) * radius);
+      canvas.drawLine(start, end, spokePaint);
+    }
+
+    // Draw central blue circle with enhanced 3D effect
+    final circlePaint = Paint()
+      ..color = Colors.blue[900]!
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, 12, circlePaint);
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawCircle(center, 12, shadowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CircularTextPainter extends CustomPainter {
+  final String text;
+  final double radius;
+  final TextStyle textStyle;
+
+  _CircularTextPainter({
+    required this.text,
+    required this.radius,
+    required this.textStyle,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final textSpan = TextSpan(text: text, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    final charAngle = (360 * (math.pi / 180)) / text.length;
+
+    for (int i = 0; i < text.length; i++) {
+      final char = text[i];
+      final angle = i * charAngle - (math.pi / 2); // Start from top
+      final x = center.dx + radius * math.cos(angle);
+      final y = center.dy + radius * math.sin(angle);
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(angle + math.pi / 2);
+
+      final charSpan = TextSpan(text: char, style: textStyle);
+      final charPainter = TextPainter(
+        text: charSpan,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      charPainter.paint(canvas, Offset(-charPainter.width / 2, -charPainter.height / 2));
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -434,7 +434,7 @@ class AddOrderScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color:
-                                  const Color(0xFFD32F2F).withOpacity(0.3),
+                                      const Color(0xFFD32F2F).withOpacity(0.3),
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -444,70 +444,104 @@ class AddOrderScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: TextFormField(
-                                controller: provider.addressController,
-                                decoration: InputDecoration(
-                                  labelText: 'Delivery Address',
-                                  labelStyle: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  suffixIcon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.my_location,
-                                          color: Color(0xFFD32F2F),
-                                        ),
-                                        onPressed: () =>
-                                            provider.fetchCurrentAddress(context),
+                              child: Selector<BloodOrderProvider, bool>(
+                                selector: (_, provider) =>
+                                    provider.isCurrentLocationLoading,
+                                builder: (context, isAddressLoading, child) {
+                                  return TextFormField(
+                                    controller: provider.addressController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Delivery Address',
+                                      labelStyle: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
                                       ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.map,
-                                          color: Color(0xFFD32F2F),
-                                        ),
-                                        onPressed: () async {
-                                          if (provider.selectedBloodBank != null) {
-                                            final result = await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MapPickerPage(
-                                                        bloodBankLocation: extractLatLng(
-                                                            provider
-                                                                .selectedBloodBank!['location'])),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
+                                      prefixIcon: isAddressLoading
+                                          ? Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2.5,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                              Color>(
+                                                          Color(0xFFD32F2F)),
+                                                ),
                                               ),
-                                            );
-                                            if (result != null &&
-                                                result is Map &&
-                                                result['address'] != null) {
-                                              provider.addressController.text =
-                                              result['address'] as String;
-                                            }
-                                          }
-                                        }
+                                            )
+                                          : Icon(
+                                              Icons.location_on,
+                                              color: Color(0xFFD32F2F),
+                                            ),
+                                      // show loading (you might want to control visibility)
+                                      suffixIcon: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.my_location,
+                                              color: Color(0xFFD32F2F),
+                                            ),
+                                            onPressed: () => provider
+                                                .fetchCurrentAddress(context),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.map,
+                                              color: Color(0xFFD32F2F),
+                                            ),
+                                            onPressed: () async {
+                                              if (provider.selectedBloodBank !=
+                                                  null) {
+                                                final result =
+                                                    await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MapPickerPage(
+                                                      bloodBankLocation:
+                                                          extractLatLng(provider
+                                                                  .selectedBloodBank![
+                                                              'location']),
+                                                    ),
+                                                  ),
+                                                );
+                                                if (result != null &&
+                                                    result is Map &&
+                                                    result['address'] != null) {
+                                                  provider.addressController
+                                                          .text =
+                                                      result['address']
+                                                          as String;
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color(0xFF212121),
-                                ),
-                                validator: (value) => value!.isEmpty
-                                    ? 'Please enter delivery address'
-                                    : null,
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF212121),
+                                    ),
+                                    validator: (value) => value!.isEmpty
+                                        ? 'Please enter delivery address'
+                                        : null,
+                                  );
+                                },
                               ),
                             ),
                           ),

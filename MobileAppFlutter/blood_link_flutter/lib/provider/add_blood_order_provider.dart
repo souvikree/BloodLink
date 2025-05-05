@@ -50,6 +50,9 @@ class BloodOrderProvider with ChangeNotifier {
   String? get selectedBloodGroup => _selectedBloodGroup;
 
   TextEditingController get quantityController => _quantityController;
+  bool _isCurrentLocationLoading = false;
+
+  bool get isCurrentLocationLoading => _isCurrentLocationLoading;
 
   TextEditingController get addressController => _addressController;
 
@@ -76,22 +79,20 @@ class BloodOrderProvider with ChangeNotifier {
 
     if (prescriptionImage == null) {
       showCustomDialog(
-        context: context,
-        title: 'please select prescription',
-        message: 'Selecting prescription is not optional',
-        buttonText: 'Okay',
-        icon: Icons.image
-      );
+          context: context,
+          title: 'please select prescription',
+          message: 'Selecting prescription is not optional',
+          buttonText: 'Okay',
+          icon: Icons.image);
       return;
     }
     if (_selectedBloodBank == null) {
       showCustomDialog(
-        context: context,
-        title: 'please select blood bank',
-        message: 'Selecting blood bank is not optional',
-        buttonText: 'Okay',
-        icon: Icons.bloodtype
-      );
+          context: context,
+          title: 'please select blood bank',
+          message: 'Selecting blood bank is not optional',
+          buttonText: 'Okay',
+          icon: Icons.bloodtype);
       return;
     }
 
@@ -133,7 +134,7 @@ class BloodOrderProvider with ChangeNotifier {
           context,
           MaterialPageRoute(
             builder: (context) => OrderConfirmationScreen(
-              orderData: responseData['order'],
+              orderData: responseData,
             ),
           ),
         );
@@ -149,6 +150,9 @@ class BloodOrderProvider with ChangeNotifier {
   }
 
   Future<void> fetchCurrentAddress(BuildContext context) async {
+    _isCurrentLocationLoading=true;
+    notifyListeners();
+
     try {
       // Step 1: Check if Location Service is enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -196,16 +200,19 @@ class BloodOrderProvider with ChangeNotifier {
 
         // Set address in provider
         addressController.text = address;
+        _isCurrentLocationLoading=false;
 
         // Optional: Save lat/lng if needed
         // provider.latitude = position.latitude;
         // provider.longitude = position.longitude;
       } else {
+        _isCurrentLocationLoading=false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Unable to fetch address.')),
         );
       }
     } catch (e) {
+      _isCurrentLocationLoading=false;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching address: $e')),
       );

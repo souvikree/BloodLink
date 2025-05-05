@@ -5,12 +5,30 @@ import 'package:blood_link_flutter/provider/profile_provider.dart';
 import 'package:blood_link_flutter/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'home_screen.dart';
 import 'login_screen.dart';
-
 void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await initLocalNotifications();
   runApp(const MyApp());
 }
+
+
+
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+// FlutterLocalNotificationsPlugin();
+//
+// Future<void> initLocalNotifications() async {
+//   const AndroidInitializationSettings initializationSettingsAndroid =
+//   AndroidInitializationSettings('@mipmap/ic_launcher');
+//
+//   const InitializationSettings initializationSettings = InitializationSettings(
+//     android: initializationSettingsAndroid,
+//     // iOS setup can be added too if needed
+//   );
+//
+//   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+// }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

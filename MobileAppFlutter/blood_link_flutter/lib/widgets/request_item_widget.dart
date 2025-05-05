@@ -60,6 +60,7 @@ class _RequestItemState extends State<RequestItem> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final isOrderCancel= widget.order['status'] == 'cancelled';
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(
@@ -134,6 +135,16 @@ class _RequestItemState extends State<RequestItem> with SingleTickerProviderStat
                                 letterSpacing: 0.5,
                               ),
                             ),
+                            if(isOrderCancel)
+                              Text(
+                                '[Order cancelled]',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.red,
+                                ),
+                              ),
+
                             const SizedBox(height: 6),
                             Text(
                               'Quantity: ${widget.quantity} Units',

@@ -31,7 +31,7 @@ class OrderConfirmationScreen extends StatelessWidget {
             color: const Color(0xFFE91E63),
             size: width * 0.07, // Responsive icon size
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context,true),
         ),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
@@ -129,7 +129,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ),
                     SizedBox(height: width * 0.02),
                     Text(
-                      'Order ID: ${orderData['_id'] ?? 'N/A'}',
+                      'Order ID: ${orderData['order']['_id'] ?? 'N/A'}',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                         fontSize: width * 0.035,
@@ -149,9 +149,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      orderData['bloodBank'] != null &&
-                          orderData['bloodBank'] is Map
-                          ? orderData['bloodBank']['name'] ?? 'Unknown Bank'
+                      orderData['bloodBankDetails'] != null
+                          ? orderData['bloodBankDetails']['name'] ?? 'Unknown Bank'
                           : 'Unknown Bank',
                       style: GoogleFonts.poppins(
                         fontSize: width * 0.04,
@@ -160,9 +159,9 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ),
                     SizedBox(height: width * 0.02),
                     Text(
-                      orderData['bloodBank'] != null &&
-                          orderData['bloodBank'] is Map
-                          ? orderData['bloodBank']['address'] ?? 'No address'
+                      orderData['bloodBankDetails'] != null &&
+                          orderData['bloodBankDetails'] is Map
+                          ? orderData['bloodBankDetails']['address'] ?? 'No address'
                           : 'No address',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
@@ -170,10 +169,10 @@ class OrderConfirmationScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      orderData['bloodBank'] != null &&
-                          orderData['bloodBank'] is Map
-                          ? 'License: ${orderData['bloodBank']['licenseId'] ?? 'N/A'}'
-                          : 'License: N/A',
+                      orderData['bloodBankDetails'] != null &&
+                          orderData['bloodBankDetails'] is Map
+                          ? 'address: ${orderData['bloodBankDetails']['address'] ?? 'N/A'}'
+                          : 'address: N/A',
                       style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                         fontSize: width * 0.035,
@@ -193,13 +192,13 @@ class OrderConfirmationScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailRow(
-                        width, 'Blood Type', orderData['bloodType'] ?? 'N/A',
+                        width, 'Blood Type', orderData['order']['bloodType'] ?? 'N/A',
                         icon: Icons.bloodtype),
                     _buildDetailRow(width, 'Quantity',
-                        '${orderData['quantity'] ?? 0} units',
+                        '${orderData['order']['quantity'] ?? 0} units',
                         icon: Icons.format_list_numbered),
                     _buildDetailRow(width, 'Delivery Address',
-                        orderData['deliveryAddress'] ?? 'N/A',
+                        orderData['order']['deliveryAddress'] ?? 'N/A',
                         icon: Icons.location_on),
                     _buildDetailRow(
                       width,
@@ -226,14 +225,14 @@ class OrderConfirmationScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDetailRow(width, 'Handling Charge',
-                        '₹${orderData['handlingCharge'] ?? 0}',
+                        '₹${orderData['order']['handlingCharge'] ?? 0}',
                         icon: Icons.monetization_on),
                     _buildDetailRow(width, 'Service Charge',
-                        '₹${orderData['serviceCharge'] ?? 0}',
+                        '₹${orderData['order']['serviceCharge'] ?? 0}',
                         icon: Icons.receipt),
                     const Divider(color: Colors.grey),
                     _buildDetailRow(width, 'Total Price',
-                        '₹${orderData['totalPrice'] ?? 0}',
+                        '₹${orderData['order']['totalPrice'] ?? 0}',
                         isBold: true, icon: Icons.payment),
                   ],
                 ),
@@ -292,7 +291,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
+                    onPressed: () => Navigator.pop(context,true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
