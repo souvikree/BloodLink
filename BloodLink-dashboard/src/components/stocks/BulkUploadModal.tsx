@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { DownloadCloud, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import api from "@/utils/api";
 
 interface BulkUploadModalProps {
     isOpen: boolean;
@@ -51,18 +52,37 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClos
         }
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (!file) return;
 
         setIsLoading(true);
 
-        // Simulate upload process
-        setTimeout(() => {
-            setIsLoading(false);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await api.post("/api/bloodbanks/inventory/bulk-upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            if (response.status !== 200) throw new Error("Upload failed");
+
             toast.success("Bulk stock uploaded successfully!");
             onClose();
             setFile(null);
-        }, 1500);
+        } catch (err: any) {
+            console.error(err);
+            if (err.response && err.response.data) {
+                toast.error(`Error: ${err.response.data.message || err.response.data.error}`);
+            } else {
+                toast.error("Something went wrong while uploading the file.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

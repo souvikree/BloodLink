@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import api from "@/utils/api";
 
 const LicenseUploadPage = () => {
     const navigate = useNavigate();
@@ -36,22 +37,37 @@ const LicenseUploadPage = () => {
         }
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (!file) return;
-
+    
         setIsLoading(true);
-
-        // Simulate upload process
-        setTimeout(() => {
-            setIsLoading(false);
+    
+        const formData = new FormData();
+        formData.append("license", file);
+    
+        const token = localStorage.getItem("token"); // Replace with correct key
+    
+        try {
+            const response = await api.post("/api/bloodbanks/upload-license", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+    
             toast.success("Your License ID has been submitted successfully! Verification will be completed within 2-3 hours.");
-
-            // Redirect after toast is shown
+    
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-        }, 1500);
+        } catch (error: any) {
+            console.error("Upload failed:", error.response?.data || error.message);
+            toast.error("Upload failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary/40 p-4">

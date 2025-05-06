@@ -37,6 +37,6 @@ const orderStatusWorker = new Worker(
 );
 
 console.log('🛠️ orderStatusWorker started...');
-console.log('Redis URL:', process.env.QUEUE_REDIS_URL);
+// console.log('Redis URL:', process.env.QUEUE_REDIS_URL);
 
 module.exports = orderStatusWorker;

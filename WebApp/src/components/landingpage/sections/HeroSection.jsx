@@ -8,7 +8,7 @@ export default function HeroSection() {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 overflow-hidden">
         <Image
-          src="/hero1.jpeg"
+          src="/hero.png"
           alt="Blood Donation Illustration"
           layout="fill"
           objectFit="cover"

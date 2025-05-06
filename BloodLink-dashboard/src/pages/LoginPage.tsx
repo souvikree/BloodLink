@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-
+import api from "@/utils/api";
 const LoginPage = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -21,17 +21,28 @@ const LoginPage = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
+    
+        try {
+            const response = await api.post("/api/bloodbanks/login", formData);
+    
+            const token = response.data.token;
+            if (token) {
+                localStorage.setItem("token", token); // store token
+            }
+    
             toast.success("Login successful!");
-            navigate("/");
-        }, 1000);
+            navigate("/dashboard"); // redirect to dashboard or home page
+        } catch (error: any) {
+            console.error("Login failed:", error?.response?.data || error.message);
+            toast.error(error?.response?.data?.message || "Login failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary/40 p-4">
