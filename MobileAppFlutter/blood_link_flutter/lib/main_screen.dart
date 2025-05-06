@@ -1,4 +1,5 @@
 import 'package:blood_link_flutter/services/notification_services.dart';
+import 'package:blood_link_flutter/services/socket_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
@@ -19,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
   // late NotificationService notificationService;
+  late NotificationSocketService _socketService;
 
   final List<Widget> _pages = [
     const HomeScreen(),
@@ -38,16 +40,17 @@ class _MainScreenState extends State<MainScreen> {
       _currentIndex = index;
     });
   }
-  // @override
-  // Future<void> initState() async {
-  //   super.initState();
-  //   notificationService = NotificationService();
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final token = prefs.getString('authToken');
-  //   if(token !=null){
-  //   notificationService.initSocket(token);
-  //   }
-  // }
+  @override
+  void initState()  {
+    super.initState();
+    _socketService = NotificationSocketService();
+    _socketService.initSocket();
+  }
+  @override
+  void dispose() {
+    _socketService.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

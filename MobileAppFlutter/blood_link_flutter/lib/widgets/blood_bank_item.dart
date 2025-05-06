@@ -24,14 +24,16 @@ class BloodBankCard extends StatelessWidget {
       opacity: 1.0,
       duration: Duration(milliseconds: 300 + (index * 100)),
       child: InkWell(
-        onTap: () {
-          print(bankData);
-          Navigator.push(
+        onTap: () async {
+          var result =await  Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BloodBankDetails(bloodData: bankData),
+              builder: (context) => BloodBankDetails(bloodData: bankData,formOrder: formAddOrder,),
             ),
           );
+          if(result){
+            Navigator.pop(context, bankData);
+          }
         },
         child: Card(
           elevation: 5,

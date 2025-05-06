@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:blood_link_flutter/pages/chat_page.dart';
 import 'package:blood_link_flutter/provider/blood_bank_fetch_provider.dart';
 import 'package:blood_link_flutter/search_blood_bank.dart';
 import 'package:blood_link_flutter/widgets/blood_bank_item.dart';
@@ -15,7 +15,8 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: RefreshIndicator(
-        onRefresh: ()=>context.read<BloodBankFetchProvider>().fetchNearbyBloodBanks(),
+        onRefresh: () =>
+            context.read<BloodBankFetchProvider>().fetchNearbyBloodBanks(),
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
@@ -28,55 +29,58 @@ class HomeScreen extends StatelessWidget {
                   color: Color(0xFF212121),
                 ),
               ),
-              // actions: [
-              //   // IconButton(
-              //   //   icon: Container(
-              //   //     padding: const EdgeInsets.all(6),
-              //   //     decoration: BoxDecoration(
-              //   //       color: Colors.white,
-              //   //       borderRadius: BorderRadius.circular(10),
-              //   //       boxShadow: [
-              //   //         BoxShadow(
-              //   //           color: Colors.black.withOpacity(0.1),
-              //   //           blurRadius: 4,
-              //   //           offset: const Offset(0, 2),
-              //   //         ),
-              //   //       ],
-              //   //     ),
-              //   //     child: const Icon(
-              //   //       Icons.chat_bubble,
-              //   //       color: Color(0xFFDC2626), // Updated red color
-              //   //       size: 20,
-              //   //     ),
-              //   //   ),
-              //   //   onPressed: () {},
-              //   //   tooltip: 'Chat',
-              //   // ),
-              //   IconButton(
-              //     icon: Container(
-              //       padding: const EdgeInsets.all(6),
-              //       decoration: BoxDecoration(
-              //         color: Colors.white,
-              //         borderRadius: BorderRadius.circular(10),
-              //         boxShadow: [
-              //           BoxShadow(
-              //             color: Colors.black.withOpacity(0.1),
-              //             blurRadius: 4,
-              //             offset: const Offset(0, 2),
-              //           ),
-              //         ],
-              //       ),
-              //       child: const Icon(
-              //         Icons.notifications,
-              //         color: Color(0xFFDC2626), // Updated red color
-              //         size: 20,
-              //       ),
-              //     ),
-              //     onPressed: () {},
-              //     tooltip: 'Notifications',
-              //   ),
-              //   const SizedBox(width: 10),
-              // ],
+              actions: [
+                IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.chat_bubble,
+                      color: Color(0xFFDC2626), // Updated red color
+                      size: 20,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ChatPage()));
+                  },
+                  tooltip: 'Chat',
+                ),
+                // IconButton(
+                //   icon: Container(
+                //     padding: const EdgeInsets.all(6),
+                //     decoration: BoxDecoration(
+                //       color: Colors.white,
+                //       borderRadius: BorderRadius.circular(10),
+                //       boxShadow: [
+                //         BoxShadow(
+                //           color: Colors.black.withOpacity(0.1),
+                //           blurRadius: 4,
+                //           offset: const Offset(0, 2),
+                //         ),
+                //       ],
+                //     ),
+                //     child: const Icon(
+                //       Icons.notifications,
+                //       color: Color(0xFFDC2626), // Updated red color
+                //       size: 20,
+                //     ),
+                //   ),
+                //   onPressed: () {},
+                //   tooltip: 'Notifications',
+                // ),
+                // const SizedBox(width: 10),
+              ],
               backgroundColor: Colors.white,
               elevation: 0,
               shadowColor: Colors.black.withOpacity(0.2),
@@ -90,7 +94,8 @@ class HomeScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -118,7 +123,8 @@ class HomeScreen extends StatelessWidget {
                             imageUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            errorBuilder: (context, error, stackTrace) => Container(
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
                               color: Colors.grey[200],
                               child: const Icon(
                                 Icons.image_not_supported,
@@ -177,11 +183,12 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Selector<BloodBankFetchProvider, (bool, String?, List<dynamic>)>(
+                child: Selector<BloodBankFetchProvider,
+                    (bool, String?, List<dynamic>)>(
                   selector: (_, provider) => (
-                  provider.isLoading,
-                  provider.errorMessage,
-                  provider.bloodBanks,
+                    provider.isLoading,
+                    provider.errorMessage,
+                    provider.bloodBanks,
                   ),
                   builder: (_, data, __) {
                     final isLoading = data.$1;
@@ -194,7 +201,8 @@ class HomeScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CircularProgressIndicator(
-                              color: const Color(0xFFDC2626), // Updated red color
+                              color: const Color(0xFFDC2626),
+                              // Updated red color
                               strokeWidth: 3,
                             ),
                             const SizedBox(height: 12),
@@ -227,9 +235,12 @@ class HomeScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
-                              onPressed: () => context.read<BloodBankFetchProvider>().fetchNearbyBloodBanks(),
+                              onPressed: () => context
+                                  .read<BloodBankFetchProvider>()
+                                  .fetchNearbyBloodBanks(),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFDC2626), // Updated red color
+                                backgroundColor: const Color(0xFFDC2626),
+                                // Updated red color
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -263,7 +274,8 @@ class HomeScreen extends StatelessWidget {
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 3 / 4,
                         crossAxisSpacing: 12,

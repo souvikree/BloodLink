@@ -1,6 +1,7 @@
 import 'package:blood_link_flutter/widgets/custom_animated_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 Map<String, int> countBloodGroupType(Map<String, dynamic>? bloodBankSent) {
   final bloodGroupsData = bloodBankSent?['bloodGroups'] as List<dynamic>? ?? [];
 
@@ -50,33 +51,51 @@ LatLng extractLatLng(Map<String, dynamic> locationData) {
 
 
 
-
 void showCustomDialog({
   required BuildContext context,
   required String title,
   required String message,
   required String buttonText,
-  IconData icon=Icons.check_circle, // Optional icon for customization
+  IconData icon = Icons.check_circle,
   VoidCallback? onButtonPressed,
   bool barrierDismissible = true,
 }) {
   showGeneralDialog(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: barrierDismissible,
     barrierLabel: "Dismiss",
     pageBuilder: (_, __, ___) => const SizedBox.shrink(),
     transitionBuilder: (_, anim, __, child) {
-      return Transform.scale(
-        scale: anim.value,
-        child: AnimatedDialog(
-          title: title,
-          message: message,
-          buttonText: "Okay",
-          icon: icon,
+      final curvedValue = Curves.easeOutBack.transform(anim.value);
+      return Opacity(
+        opacity: anim.value,
+        child: Transform.scale(
+          scale: curvedValue,
+          child: AnimatedDialog(
+            title: title,
+            message: message,
+            buttonText: buttonText,
+            icon: icon,
+          ),
         ),
       );
     },
-    transitionDuration: const Duration(milliseconds: 300),
+    transitionDuration: const Duration(milliseconds: 400), // slightly longer for smoother feel
   );
+}
 
+
+
+Future<String> latLngToAddress(double latitude, double longitude) async {
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    if (placemarks.isNotEmpty) {
+      final placemark = placemarks.first;
+      return "${placemark.name}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}";
+    } else {
+      return "No address found";
+    }
+  } catch (e) {
+    return "Error: ${e.toString()}";
+  }
 }

@@ -527,6 +527,14 @@ class AddOrderScreen extends StatelessWidget {
                                                       result['address']
                                                           as String;
                                                 }
+                                              } else {
+                                                showCustomDialog(
+                                                    context: context,
+                                                    title:
+                                                        'please select blood bank',
+                                                    message:
+                                                        'Choose a blood bank to easily view its location on the map.',
+                                                    buttonText: 'Okay');
                                               }
                                             },
                                           ),

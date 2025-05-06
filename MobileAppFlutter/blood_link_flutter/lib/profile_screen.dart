@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'edit_profile.dart';
+import 'extra_functions.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
@@ -12,61 +13,61 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-        data: _lightTheme,
-        child: Scaffold(
-          body: CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context),
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.white, Colors.grey.shade50],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+      data: _lightTheme,
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            _buildSliverAppBar(context),
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.white, Colors.grey.shade50],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
-                  child: Consumer<ProfileProvider>(
-                    builder: (context, provider, _) {
-                      if (provider.isLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(color: Colors.redAccent),
-                        );
-                      }
-                      if (provider.errorMessage != null) {
-                        return _buildErrorState(context, provider);
-                      }
-                      return _buildProfileView(provider.profileData);
-                    },
-                  ),
+                ),
+                child: Consumer<ProfileProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.isLoading) {
+                      return const Center(
+                        child:
+                            CircularProgressIndicator(color: Colors.redAccent),
+                      );
+                    }
+                    if (provider.errorMessage != null) {
+                      return _buildErrorState(context, provider);
+                    }
+                    return _buildProfileView(provider.profileData);
+                  },
                 ),
               ),
-            ],
-          ),
-          floatingActionButton: Consumer<ProfileProvider>(
-            builder: (context, provider, _) => FadeInUp(
-              duration: const Duration(milliseconds: 500),
-              child: FloatingActionButton.extended(
-                onPressed: provider.profileData != null
-                    ? () => _onEditProfile(context, provider.profileData!)
-                    : null,
-                label: const Text(
-                  'Edit Profile',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                icon: const Icon(Icons.edit),
-                backgroundColor: provider.profileData != null
-                    ? Colors.redAccent
-                    : Colors.grey,
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+            ),
+          ],
+        ),
+        floatingActionButton: Consumer<ProfileProvider>(
+          builder: (context, provider, _) => FadeInUp(
+            duration: const Duration(milliseconds: 500),
+            child: FloatingActionButton.extended(
+              onPressed: provider.profileData != null
+                  ? () => _onEditProfile(context, provider.profileData!)
+                  : null,
+              label: const Text(
+                'Edit Profile',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              icon: const Icon(Icons.edit),
+              backgroundColor:
+                  provider.profileData != null ? Colors.redAccent : Colors.grey,
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
@@ -150,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
                 backgroundColor: Colors.redAccent,
                 foregroundColor: Colors.white,
                 padding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -236,56 +237,72 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildDetailCard(Map<String, dynamic>? profileData) {
     return FadeInUp(
-      duration: const Duration(milliseconds: 900),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              _buildProfileItem(
-                icon: Icons.bloodtype,
-                title: 'Blood Group',
-                subtitle: profileData?['bloodGroup']?.toString() ?? 'N/A',
-              ),
-              _buildProfileItem(
-                icon: Icons.phone,
-                title: 'Mobile',
-                subtitle: profileData?['mobile']?.toString() ?? 'N/A',
-              ),
-              _buildProfileItem(
-                icon: Icons.location_on,
-                title: 'Location',
-                subtitle: profileData?['location'] != null
-                    ? 'Lat: ${profileData?['location']['coordinates']?[1]?.toString() ?? 'N/A'}\nLng: ${profileData?['location']['coordinates']?[0]?.toString() ?? 'N/A'}'
-                    : 'N/A',
-              ),
-              _buildProfileItem(
-                icon: Icons.calendar_today,
-                title: 'Joined On',
-                subtitle: _formatDate(profileData?['createdAt']),
-              ),
-              _buildProfileItem(
-                icon: Icons.update,
-                title: 'Last Updated',
-                subtitle: _formatDate(profileData?['updatedAt']),
-              ),
-              _buildProfileItem(
-                icon: Icons.perm_identity,
-                title: 'Profile ID',
-                subtitle: profileData?['_id']?.toString() ?? 'N/A',
-              ),
-              _buildProfileItem(
-                icon: Icons.info,
-                title: 'Version',
-                subtitle: profileData?['__v']?.toString() ?? 'N/A',
-              ),
-            ],
+        duration: const Duration(milliseconds: 900),
+        child: Card(
+          elevation: 8,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                _buildProfileItem(
+                  icon: Icons.bloodtype,
+                  title: 'Blood Group',
+                  subtitle: profileData?['bloodGroup']?.toString() ?? 'N/A',
+                ),
+                _buildProfileItem(
+                  icon: Icons.phone,
+                  title: 'Mobile',
+                  subtitle: profileData?['mobile']?.toString() ?? 'N/A',
+                ),
+                FutureBuilder<String>(
+                    future: latLngToAddress(
+                      profileData?['location']['coordinates'][1], // latitude
+                      profileData?['location']['coordinates'][0], // longitude
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return _buildProfileItem(
+                            icon: Icons.location_on,
+                            title: 'Location',
+                            subtitle: 'Loading....');
+                      } else if (snapshot.hasError) {
+                        return _buildProfileItem(
+                            icon: Icons.location_on,
+                            title: 'Location',
+                            subtitle: 'NA');
+                      }
+                      return _buildProfileItem(
+                          icon: Icons.location_on,
+                          title: 'Location',
+                          subtitle: snapshot.data!);
+                    }),
+                _buildProfileItem(
+                  icon: Icons.calendar_today,
+                  title: 'Joined On',
+                  subtitle: _formatDate(profileData?['createdAt']),
+                ),
+                _buildProfileItem(
+                  icon: Icons.update,
+                  title: 'Last Updated',
+                  subtitle: _formatDate(profileData?['updatedAt']),
+                ),
+                _buildProfileItem(
+                  icon: Icons.perm_identity,
+                  title: 'Profile ID',
+                  subtitle: profileData?['_id']?.toString() ?? 'N/A',
+                ),
+                _buildProfileItem(
+                  icon: Icons.info,
+                  title: 'Version',
+                  subtitle: profileData?['__v']?.toString() ?? 'N/A',
+                ),
+              ],
+            ),
           ),
-        ),
-      ));
+        ));
   }
 
   String _formatDate(String? isoDate) {

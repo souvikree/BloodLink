@@ -1,7 +1,13 @@
 import 'dart:convert';
+import 'package:blood_link_flutter/provider/add_blood_order_provider.dart';
+import 'package:blood_link_flutter/provider/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'extra_functions.dart';
+import 'google_map_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic> profileData;
@@ -251,30 +257,88 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ],
                   ),
-                  child: TextFormField(
-                    controller: _addressController,
-                    decoration: InputDecoration(
-                      labelText: 'Address',
-                      labelStyle: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF212121),
-                    ),
-                    validator: (value) =>
-                    value!.isEmpty ? 'Please enter an address' : null,
+                  child: Selector<ProfileProvider, bool>(
+                    selector: (_, provider) => provider.isCurrentLocationLoading,
+                    builder: (context, isAddressLoading, child) {
+                      final provider = context.read<ProfileProvider>();
+
+                      return TextFormField(
+                        controller: provider.addressController, // same controller logic
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          prefixIcon: isAddressLoading
+                              ? Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor:
+                                AlwaysStoppedAnimation<Color>(Color(0xFFD32F2F)),
+                              ),
+                            ),
+                          )
+                              : Icon(
+                            Icons.location_on,
+                            color: Color(0xFFD32F2F),
+                          ),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.my_location,
+                                  color: Color(0xFFD32F2F),
+                                ),
+                                onPressed: () => provider.fetchCurrentAddress(context),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.map,
+                                  color: Color(0xFFD32F2F),
+                                ),
+                                onPressed: () async {
+
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MapPickerPage(
+                                        ),
+                                      ),
+                                    );
+                                    if (result != null &&
+                                        result is Map &&
+                                        result['address'] != null) {
+                                      provider.addressController.text = result['address'] as String;
+                                    }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF212121),
+                        ),
+                        validator: (value) =>
+                        value!.isEmpty ? 'Please enter an address' : null,
+                      );
+                    },
                   ),
+
                 ),
               ),
               const SizedBox(height: 20),

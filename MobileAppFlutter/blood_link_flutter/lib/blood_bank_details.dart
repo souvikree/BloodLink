@@ -6,8 +6,9 @@ import 'extra_functions.dart';
 
 class BloodBankDetails extends StatelessWidget {
   final Map<String, dynamic> bloodData;
+  final bool formOrder;
 
-  const BloodBankDetails({super.key, required this.bloodData});
+  const BloodBankDetails({super.key, required this.bloodData,  this.formOrder=false});
 
   @override
   Widget build(BuildContext context) {
@@ -166,14 +167,19 @@ class BloodBankDetails extends StatelessWidget {
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddOrderScreen(
-                        bloodBank: bloodData,
+                  if(formOrder){
+                    Navigator.pop(context, true);
+                  }else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddOrderScreen(
+                              bloodBank: bloodData,
+                            ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
