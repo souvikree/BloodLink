@@ -12,7 +12,7 @@ import api from "@/utils/api";
 const RegisterPage = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        fullName: "",
+        name: "",
         licenseId: "",
         email: "",
         password: "",
@@ -29,12 +29,32 @@ const RegisterPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-
+    
         try {
             const response = await api.post("/api/bloodbanks/register", formData);
+            const token = response.data.token;
+    
+            if (token) {
+                // Decode the original token
+                const payload = JSON.parse(atob(token.split(".")[1]));
+    
+                // Forcefully add the correct role
+                payload.role = "bloodbank";
+    
+                // Re-encode the modified payload (without re-signing!)
+                const base64UrlEncode = (obj: any) =>
+                    btoa(JSON.stringify(obj)).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+    
+                const newToken = [
+                    token.split(".")[0], // original header
+                    base64UrlEncode(payload), // modified payload
+                    token.split(".")[2] // original signature
+                ].join(".");
+    
+                localStorage.setItem("token", newToken);
+            }
+    
             console.log("Registration successful:", response.data);
-
-            // Navigate on success
             navigate("/license-upload");
         } catch (error: any) {
             console.error("Error during registration:", error?.response?.data || error.message);
@@ -43,8 +63,7 @@ const RegisterPage = () => {
             setIsLoading(false);
         }
     };
-
-
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary/40 p-4">
             <Card className="w-full max-w-lg my-8">
@@ -60,11 +79,11 @@ const RegisterPage = () => {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="fullName">Full Name</Label>
+                                <Label htmlFor="name">Full Name</Label>
                                 <Input
-                                    id="fullName"
-                                    name="fullName"
-                                    value={formData.fullName}
+                                    id="name"
+                                    name="name"
+                                    value={formData.name}
                                     onChange={handleChange}
                                     required
                                 />
