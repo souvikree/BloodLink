@@ -36,7 +36,7 @@ require('./workers/orderStatusWorker');
 // Middleware
 
 app.use(cors({
-    origin: ["http://localhost:8080", "https://bloodlink-dashboard.vercel.app"],
+    origin: ["http://localhost:8080", "https://bloodlink-dashboard.vercel.app","*"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }));
