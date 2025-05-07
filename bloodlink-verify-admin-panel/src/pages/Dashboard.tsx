@@ -1,17 +1,43 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
-import UserTable from '@/components/users/UserTable';
 import SearchFilter from '@/components/users/SearchFilter';
 import { getUsers, searchUsers, User } from '@/services/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import BloodBankTable from '@/components/users/BloodBankTable';
+import api from '@/utils/api';
+
+
+export interface BloodBank {
+  _id: string;
+  name: string;
+  licenseId: string;
+  licenseDocumentUrl: string;
+  email: string;
+  password: string;
+  contactNumber: string;
+  address: string;
+  location: {
+    type: string;
+    coordinates: [number, number];
+  };
+  isApproved: boolean;
+  [key: string]: any;
+}
+
+const getPendingBloodBanks = async (): Promise<BloodBank[]> => {
+  const res = await api.get('/api/admin/pending-bloodbanks');
+  return res.data;
+};
 
 const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
+  const [pendingBloodbanks, setPendingBloodbanks] = useState<BloodBank[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
@@ -27,8 +53,21 @@ const Dashboard = () => {
     }
   };
 
+  const fetchPendingBloodbanks = async () => {
+    try {
+      const data = await getPendingBloodBanks();
+      setPendingBloodbanks(data);
+      // setPendingBloodbanks(res.data || []);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to fetch pending blood banks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchPendingBloodbanks();
   }, []);
 
   const handleSearch = async (query: string) => {
@@ -49,16 +88,16 @@ const Dashboard = () => {
   const handleFilterChange = async (status: string) => {
     setActiveTab(status);
     setLoading(true);
-    
+
     try {
       let filtered: User[];
-      
+
       if (status === 'all') {
         filtered = await getUsers();
       } else {
         filtered = await getUsers(status as 'pending' | 'verified' | 'rejected');
       }
-      
+
       setFilteredUsers(filtered);
     } catch (error) {
       console.error('Filter failed:', error);
@@ -87,15 +126,24 @@ const Dashboard = () => {
             <h3 className="font-medium text-gray-500">Total Users</h3>
             <p className="text-3xl font-bold">{users.length}</p>
           </div>
-          <div onClick={() => navigate('/admin/pending')} className="bg-white p-6 rounded-lg border border-yellow-200 shadow-sm cursor-pointer hover:bg-yellow-50 transition-colors">
+          <div
+            onClick={() => navigate('/admin/pending')}
+            className="bg-white p-6 rounded-lg border border-yellow-200 shadow-sm cursor-pointer hover:bg-yellow-50 transition-colors"
+          >
             <h3 className="font-medium text-yellow-700">Pending</h3>
             <p className="text-3xl font-bold text-yellow-800">{pendingCount}</p>
           </div>
-          <div onClick={() => navigate('/admin/verified')} className="bg-white p-6 rounded-lg border border-green-200 shadow-sm cursor-pointer hover:bg-green-50 transition-colors">
+          <div
+            onClick={() => navigate('/admin/verified')}
+            className="bg-white p-6 rounded-lg border border-green-200 shadow-sm cursor-pointer hover:bg-green-50 transition-colors"
+          >
             <h3 className="font-medium text-green-700">Verified</h3>
             <p className="text-3xl font-bold text-green-800">{verifiedCount}</p>
           </div>
-          <div onClick={() => navigate('/admin/rejected')} className="bg-white p-6 rounded-lg border border-red-200 shadow-sm cursor-pointer hover:bg-red-50 transition-colors">
+          <div
+            onClick={() => navigate('/admin/rejected')}
+            className="bg-white p-6 rounded-lg border border-red-200 shadow-sm cursor-pointer hover:bg-red-50 transition-colors"
+          >
             <h3 className="font-medium text-red-700">Rejected</h3>
             <p className="text-3xl font-bold text-red-800">{rejectedCount}</p>
           </div>
@@ -104,7 +152,7 @@ const Dashboard = () => {
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Recent Verifications</h2>
           <SearchFilter onSearch={handleSearch} onFilterChange={handleFilterChange} />
-          
+
           <Tabs defaultValue="all" className="mb-4" onValueChange={handleFilterChange}>
             <TabsList>
               <TabsTrigger value="all">All Users</TabsTrigger>
@@ -113,16 +161,24 @@ const Dashboard = () => {
               <TabsTrigger value="rejected">Rejected</TabsTrigger>
             </TabsList>
           </Tabs>
-          
+
           {loading ? (
             <div className="py-20 text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+              <div
+                className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                role="status"
+              >
+                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                  Loading...
+                </span>
               </div>
               <p className="mt-2 text-sm text-gray-500">Loading users...</p>
             </div>
           ) : (
-            <UserTable users={filteredUsers} onStatusUpdate={fetchUsers} />
+            <BloodBankTable
+              users={activeTab === 'pending' ? pendingBloodbanks : filteredUsers}
+              onStatusUpdate={fetchUsers}
+            />
           )}
         </div>
       </div>
