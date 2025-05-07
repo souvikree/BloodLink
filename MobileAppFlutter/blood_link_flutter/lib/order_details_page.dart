@@ -88,6 +88,8 @@ class OrderDetailsPage extends StatelessWidget {
                             
                           ),
                           Container(margin: const EdgeInsets.only(top: 8, bottom: 16), height: 3, width: 60, color: const Color(0xFFD32F2F)),
+                          _buildDetailRow(icon: Icons.receipt_long, label: 'Order Status', value: order['status'] ?? 'N/A'),
+                          const SizedBox(height: 16),
                           _buildDetailRow(icon: Icons.assignment, label: 'Order ID', value: order['_id'] ?? 'N/A'),
                           const SizedBox(height: 16),
                           _buildDetailRow(icon: Icons.person, label: 'Patient ID', value: order['patient'] ?? 'N/A'),
