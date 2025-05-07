@@ -39,42 +39,144 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
-            <Route path="/login" element={
-              isAuthenticated ? <Navigate to="/" /> : <><NavbarPublic /><LoginPage /></>
-            } />
-            <Route path="/register" element={
-              isAuthenticated ? <Navigate to="/" /> : <><NavbarPublic /><RegisterPage /></>
-            } />
-            <Route path="/license-upload" element={
-              isAuthenticated ? <Navigate to="/" /> : <><NavbarPublic /><LicenseUploadPage /></>
-            } />
-            
+            <Route
+              path="/login"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/" />
+                ) : (
+                  <>
+                    <NavbarPublic />
+                    <LoginPage setIsAuthenticated={setIsAuthenticated} />
+                  </>
+                )
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/" />
+                ) : (
+                  <>
+                    <NavbarPublic />
+                    <RegisterPage />
+                  </>
+                )
+              }
+            />
+            <Route
+              path="/license-upload"
+              element={
+                isAuthenticated ? (
+                  <Navigate to="/" />
+                ) : (
+                  <>
+                    <NavbarPublic />
+                    <LicenseUploadPage />
+                  </>
+                )
+              }
+            />
+
             {/* Protected routes */}
-            <Route path="/" element={
-              isAuthenticated ? <DashboardLayout><Index /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/stocks" element={
-              isAuthenticated ? <DashboardLayout><StocksPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/requests" element={
-              isAuthenticated ? <DashboardLayout><RequestsPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/receiver" element={
-              isAuthenticated ? <DashboardLayout><ReceiverPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/donors" element={
-              isAuthenticated ? <DashboardLayout><DonorsPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/notifications" element={
-              isAuthenticated ? <DashboardLayout><NotificationsPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/settings" element={
-              isAuthenticated ? <DashboardLayout><SettingsPage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            <Route path="/profile" element={
-              isAuthenticated ? <DashboardLayout><ProfilePage /></DashboardLayout> : <Navigate to="/login" />
-            } />
-            
+            <Route
+              path="/"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <Index />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/stocks"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <StocksPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/requests"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <RequestsPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/receiver"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <ReceiverPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/donors"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <DonorsPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <NotificationsPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <SettingsPage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                isAuthenticated ? (
+                  <DashboardLayout>
+                    <ProfilePage />
+                  </DashboardLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
