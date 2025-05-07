@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'pages/add_order_screen.dart';
 import 'extra_functions.dart';
+import 'pages/add_order_screen.dart';
 
 class BloodBankDetails extends StatelessWidget {
   final Map<String, dynamic> bloodData;
   final bool formOrder;
+  final bool formBloodOrder;
 
-  const BloodBankDetails({super.key, required this.bloodData,  this.formOrder=false});
+  const BloodBankDetails(
+      {super.key,
+      required this.bloodData,
+      this.formOrder = false,
+      this.formBloodOrder = false});
 
   @override
   Widget build(BuildContext context) {
@@ -89,21 +94,19 @@ class BloodBankDetails extends StatelessWidget {
                             width: screenWidth * 0.15,
                             color: const Color(0xFFD32F2F),
                           ),
-
                           _buildDetailRow(
                             icon: Icons.local_hospital,
                             label: 'Name',
                             value: bloodData['name'] ?? 'N/A',
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildDetailRow(
                             icon: Icons.phone,
                             label: 'Contact Number',
-                            value: bloodData['contactNumber']?.toString() ?? 'N/A',
+                            value:
+                                bloodData['contactNumber']?.toString() ?? 'N/A',
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildDetailRow(
                             icon: Icons.location_on,
                             label: 'Address',
@@ -111,21 +114,18 @@ class BloodBankDetails extends StatelessWidget {
                             maxLines: 2,
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildDetailRow(
                             icon: Icons.water_drop,
                             label: 'Total Available Blood Groups (Unit)',
                             value: bloodGroupUnitMap.toString(),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildDetailRow(
                             icon: Icons.format_list_numbered,
                             label: 'Available Blood Groups (Searched)',
                             value: _formatSearchedUnit(bloodData),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildDetailRow(
                             icon: Icons.check_circle_outline,
                             label: 'Compatible Units',
@@ -133,7 +133,6 @@ class BloodBankDetails extends StatelessWidget {
                             maxLines: 3,
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           _buildMapLinksSection(context),
                         ],
                       ),
@@ -142,67 +141,67 @@ class BloodBankDetails extends StatelessWidget {
                 ),
               ),
             ),
-
             SizedBox(height: screenHeight * 0.02),
-
-            Container(
-              margin: EdgeInsets.only(bottom: screenHeight * 0.02),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD32F2F).withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            if (!formBloodOrder) ...[
+              Container(
+                margin: EdgeInsets.only(bottom: screenHeight * 0.02),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD32F2F).withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (formOrder) {
+                      Navigator.pop(context, true);
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddOrderScreen(
+                            bloodBank: bloodData,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding:
+                        EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                    minimumSize: Size(double.infinity, screenHeight * 0.07),
+                  ),
+                  child: Text(
+                    'Request Blood',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if(formOrder){
-                    Navigator.pop(context, true);
-                  }else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AddOrderScreen(
-                              bloodBank: bloodData,
-                            ),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                      vertical: screenHeight * 0.02),
-                  minimumSize: Size(double.infinity, screenHeight * 0.07),
-                ),
-                child: Text(
-                  'Request Blood',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.045,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            ]
           ],
         ),
       ),
     );
   }
+
   Widget _buildMapLinksSection(BuildContext context) {
     final directionLinks = bloodData['directionLinks'] ?? {};
     final googleMapsUrl = directionLinks['googleMapsUrl'] ?? '';
@@ -212,9 +211,11 @@ class BloodBankDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDetailRow(
-          icon: Icons.directions, // Icon before "Get Directions"
+          icon: Icons.directions,
+          // Icon before "Get Directions"
           label: 'Get Directions',
-          value: 'Get the blood bank location by clicking the buttons.', // Empty value since it's a heading
+          value: 'Get the blood bank location by clicking the buttons.',
+          // Empty value since it's a heading
           maxLines: 2,
         ),
         const SizedBox(height: 12),
@@ -226,19 +227,26 @@ class BloodBankDetails extends StatelessWidget {
               label: 'Google Maps',
               icon: Icons.map,
               url: googleMapsUrl,
-              gradientColors: [Color(0xFF4285F4), Color(0xFF34A853)], // Google colors
+              gradientColors: [
+                Color(0xFF4285F4),
+                Color(0xFF34A853)
+              ], // Google colors
             ),
             _buildMapButton(
               label: 'Apple Maps',
               icon: Icons.map_outlined,
               url: appleMapsUrl,
-              gradientColors: [Color(0xFF000000), Color(0xFF555555)], // Sleek gray
+              gradientColors: [
+                Color(0xFF000000),
+                Color(0xFF555555)
+              ], // Sleek gray
             ),
           ],
         ),
       ],
     );
   }
+
   String _formatSearchedUnit(Map<String, dynamic> data) {
     final searched = data['availableUnits']?['searched'];
     if (searched != null && searched is Map) {
@@ -260,7 +268,6 @@ class BloodBankDetails extends StatelessWidget {
     }
     return 'N/A';
   }
-
 
   Widget _buildMapButton({
     required String label,

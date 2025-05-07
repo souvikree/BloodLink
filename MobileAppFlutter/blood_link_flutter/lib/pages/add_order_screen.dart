@@ -248,7 +248,7 @@ class AddOrderScreen extends StatelessWidget {
                                           builder: (context) =>
                                               BloodBankDetails(
                                             bloodData:
-                                                provider.selectedBloodBank!,
+                                                provider.selectedBloodBank!,formBloodOrder: true,
                                           ),
                                         ),
                                       );
