@@ -34,7 +34,7 @@ const LoginPage = () => {
             }
     
             toast.success("Login successful!");
-            navigate("/dashboard"); // redirect to dashboard or home page
+            navigate("/"); // redirect to dashboard or home page
         } catch (error: any) {
             console.error("Login failed:", error?.response?.data || error.message);
             toast.error(error?.response?.data?.message || "Login failed. Please try again.");
