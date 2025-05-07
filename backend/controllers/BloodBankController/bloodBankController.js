@@ -13,6 +13,7 @@ const Order = require("../../models/patientModel/Order");
 const Inventory = require("../../models/BloodBankModel/Inventory");
 const { getCoordinates } = require("../../utils/geocode");
 const { getInventoryStats } = require("../../services/BloodBankService/inventoryService");
+const { createNotification } = require('../../controllers/NotificationController/notificationController');
 
 const orderStatusQueue = require('../../queues/orderStatusQueue');
 
