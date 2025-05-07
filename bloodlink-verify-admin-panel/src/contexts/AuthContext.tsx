@@ -1,7 +1,15 @@
+// src/contexts/AuthContext.tsx
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import api from "@/utils/api"; // Your Axios instance
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -10,50 +18,55 @@ interface AuthContextType {
   loading: boolean;
 }
 
-// Mock admin credentials for demo purposes
-// In a real app, this would be handled by a backend service
-const ADMIN_EMAIL = "admin@bloodlink.org";
-const ADMIN_PASSWORD = "adminpassword";
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem("admin_authenticated") === "true";
-  });
-  const [loading, setLoading] = useState(false);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const login = async (email: string, password: string): Promise<boolean> => {
-    setLoading(true);
-    
-    // Simulate API call with a delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-          setIsAuthenticated(true);
-          localStorage.setItem("admin_authenticated", "true");
-          toast.success("Login successful");
-          
-          // Redirect to dashboard or the page they tried to access
-          const origin = location.state?.from?.pathname || "/admin/dashboard";
-          navigate(origin);
-          resolve(true);
-        } else {
-          toast.error("Invalid email or password");
-          resolve(false);
-        }
-        setLoading(false);
-      }, 800);
-    });
+    try {
+      setLoading(true);
+      const res = await api.post("/api/admin/login", { email, password });
+
+      const token = res.data.token;
+      if (token) {
+        localStorage.setItem("admin_token", token);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`; // Set the token in Axios headers
+        console.log("Token set in local storage and Axios headers:", token);
+        setIsAuthenticated(true);
+        toast.success("Login successful");
+
+        const origin = (location.state as any)?.from?.pathname || "/admin/dashboard";
+        navigate(origin, { replace: true });
+        return true;
+      }
+
+      toast.error("No token received from server.");
+      return false;
+    } catch (err) {
+      toast.error("Invalid email or password");
+      console.error("Login error:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem("admin_token");
     setIsAuthenticated(false);
-    localStorage.removeItem("admin_authenticated");
-    navigate("/admin-login");
     toast.success("Logged out successfully");
+    navigate("/admin-login");
   };
 
   return (
@@ -61,27 +74,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};
 
-export function RequireAuth({ children }: { children: JSX.Element }) {
+export const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
-      // Redirect to login page, but save the current location
-      navigate("/admin-login", { state: { from: location } });
+      navigate("/admin-login", { state: { from: location }, replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, location, navigate]);
 
   return isAuthenticated ? children : null;
-}
+};

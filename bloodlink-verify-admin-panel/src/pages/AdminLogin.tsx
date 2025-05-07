@@ -1,41 +1,45 @@
+// src/pages/AdminLogin.tsx
 
-import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const { login, isAuthenticated, loading } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // If already authenticated, redirect to dashboard
-  if (isAuthenticated) {
-    return <Navigate to="/admin/dashboard" />;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/admin/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password");
       return;
     }
 
-    try {
-      const success = await login(email, password);
-      if (!success) {
-        setError('Invalid email or password');
-      }
-    } catch (err) {
-      setError('An error occurred during login');
-      console.error(err);
+    const success = await login(email, password);
+    if (!success) {
+      setError("Invalid email or password");
     }
   };
 
@@ -72,12 +76,7 @@ const AdminLogin = () => {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <a href="#" className="text-sm text-bloodlink hover:underline">
-                  Forgot password?
-                </a>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -87,19 +86,15 @@ const AdminLogin = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button 
-              type="submit" 
-              className="w-full bg-bloodlink hover:bg-bloodlink-dark" 
+            <Button
+              type="submit"
+              className="w-full bg-bloodlink hover:bg-bloodlink-dark"
               disabled={loading}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </CardFooter>
         </form>
-        <div className="p-4 bg-gray-50 text-center rounded-b-lg border-t text-sm text-gray-500">
-          <p>For demo purposes, use:</p>
-          <p className="font-medium">admin@bloodlink.org / adminpassword</p>
-        </div>
       </Card>
     </div>
   );

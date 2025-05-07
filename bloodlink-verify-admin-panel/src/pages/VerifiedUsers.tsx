@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
-import UserTable from '@/components/users/UserTable';
 import SearchFilter from '@/components/users/SearchFilter';
 import { getUsers, searchUsers, User } from '@/services/mockData';
+import BloodBankTable from '@/components/users/BloodBankTable';
 
 const VerifiedUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -67,7 +67,7 @@ const VerifiedUsers = () => {
               <p className="mt-2 text-sm text-gray-500">Loading verified users...</p>
             </div>
           ) : (
-            <UserTable users={users} onStatusUpdate={fetchUsers} />
+            <BloodBankTable users={users} onStatusUpdate={fetchUsers} />
           )}
         </div>
       </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
-import UserTable from '@/components/users/UserTable';
+import BloodBankTable from '@/components/users/BloodBankTable';
 import SearchFilter from '@/components/users/SearchFilter';
 import { getUsers, searchUsers, User } from '@/services/mockData';
 
@@ -67,7 +67,7 @@ const RejectedUsers = () => {
               <p className="mt-2 text-sm text-gray-500">Loading rejected users...</p>
             </div>
           ) : (
-            <UserTable users={users} onStatusUpdate={fetchUsers} />
+            <BloodBankTable users={users} onStatusUpdate={fetchUsers} />
           )}
         </div>
       </div>

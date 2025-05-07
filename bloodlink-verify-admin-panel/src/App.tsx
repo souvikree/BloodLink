@@ -9,7 +9,7 @@ import { AuthProvider, RequireAuth } from "./contexts/AuthContext";
 // Pages
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
-import PendingUsers from "./pages/PendingUsers";
+import PendingUsers from "./pages/PendingBloodBanks";
 import VerifiedUsers from "./pages/VerifiedUsers";
 import RejectedUsers from "./pages/RejectedUsers";
 import NotFound from "./pages/NotFound";
