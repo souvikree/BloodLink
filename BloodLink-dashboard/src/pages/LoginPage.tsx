@@ -1,14 +1,25 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import api from "@/utils/api";
-const LoginPage = () => {
+
+type LoginPageProps = {
+    setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: "",
@@ -18,23 +29,24 @@ const LoginPage = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-    
+
         try {
             const response = await api.post("/api/bloodbanks/login", formData);
-    
+
             const token = response.data.token;
             if (token) {
-                localStorage.setItem("token", token); // store token
+                localStorage.setItem("token", token);
+                setIsAuthenticated(true); // <-- Critical fix
             }
-    
+
             toast.success("Login successful!");
-            navigate("/"); // redirect to dashboard or home page
+            navigate("/"); // Redirect to dashboard
         } catch (error: any) {
             console.error("Login failed:", error?.response?.data || error.message);
             toast.error(error?.response?.data?.message || "Login failed. Please try again.");
@@ -42,7 +54,6 @@ const LoginPage = () => {
             setIsLoading(false);
         }
     };
-    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary/40 p-4">
@@ -73,7 +84,10 @@ const LoginPage = () => {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <Link to="/forgot-password" className="text-sm text-bloodlink-600 hover:underline">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-sm text-bloodlink-600 hover:underline"
+                                >
                                     Forgot password?
                                 </Link>
                             </div>
