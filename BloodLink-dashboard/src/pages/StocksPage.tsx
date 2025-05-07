@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { StockTable } from "../components/stocks/StockTable";
+import  StockTable  from "../components/stocks/StockTable";
 import { BulkUploadModal } from "../components/stocks/BulkUploadModal";
 import { 
   Dialog, 
