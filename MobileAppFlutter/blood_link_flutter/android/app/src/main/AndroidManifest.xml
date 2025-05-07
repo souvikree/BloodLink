@@ -4,7 +4,7 @@
         android:label="blood_link_flutter"
         android:name="${applicationName}"
 
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">

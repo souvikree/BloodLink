@@ -48,7 +48,19 @@ class SearchBloodBank extends StatelessWidget {
             children: [
               // Dropdown for blood group selection
               _buildBloodGroupDropdown(context),
-              const SizedBox(height: 20),
+
+              Align(
+                alignment: Alignment.topRight,
+                child: TextButton(
+                  onPressed: () {
+                    context.read<BloodBankFetchProvider>().onBloodGroupChanged('');
+                  },
+                  child: const Text(
+                    'Clear',
+                    style: TextStyle(color: Color(0xFFD32F2F), fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
               // Blood banks list or loading/error state
               Expanded(child: _buildBloodBanksList(context)),
             ],

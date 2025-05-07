@@ -173,12 +173,81 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                                 ],
                               ),
                               child: Image.asset(
-                                "asset/images/bloodlinklogo.png",
+                                "asset/images/logo_path.png", // Updated path
                                 height: 180,
                                 width: 180,
                               ),
                             ),
                           ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  // Flashy App Name
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      final scale = 1 + 0.02 * (_controller.value);
+                      return Transform.scale(
+                        scale: scale,
+                        child: ShaderMask(
+                          shaderCallback: (bounds) {
+                            return LinearGradient(
+                              colors: [
+                                Colors.white,
+                                Colors.redAccent,
+                                Colors.white,
+                              ],
+                              stops: [0.0, 0.5, 1.0],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              transform: GradientRotation(_controller.value * 2 * 3.1415),
+                            ).createShader(bounds);
+                          },
+                          child: Text(
+                            "BloodLink",
+                            style: const TextStyle(
+                              color: Colors.white, // Base color (shader will override)
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.8,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 20,
+                                  color: Colors.redAccent,
+                                  offset: Offset(0, 0),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  // Flashy Tagline
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: 0.7 + 0.3 * (_controller.value),
+                        child: Text(
+                          "Donate blood. Save lives. Be someone's hero.",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.1,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10,
+                                color: Colors.redAccent,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       );
                     },
@@ -200,6 +269,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       ),
     );
   }
+
+
 }
 
 // Custom painter for wave background

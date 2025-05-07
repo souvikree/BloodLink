@@ -16,10 +16,7 @@ class BloodBankDetails extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Extract unique blood groups
-    final bloodGroupUnitMap = countBloodGroupType(bloodData);
-    final bloodGroupsText = bloodGroupUnitMap.isNotEmpty
-        ? bloodGroupUnitMap.entries.map((e) => '${e.key} (${e.value})').join(', ')
-        : 'N/A';
+    final bloodGroupUnitMap = totalBloodBankUnit(bloodData);
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -117,14 +114,14 @@ class BloodBankDetails extends StatelessWidget {
 
                           _buildDetailRow(
                             icon: Icons.water_drop,
-                            label: 'Available Blood Groups',
-                            value: bloodGroupsText,
+                            label: 'Total Available Blood Groups (Unit)',
+                            value: bloodGroupUnitMap.toString(),
                           ),
                           SizedBox(height: screenHeight * 0.02),
 
                           _buildDetailRow(
                             icon: Icons.format_list_numbered,
-                            label: 'Available Units (Searched)',
+                            label: 'Available Blood Groups (Searched)',
                             value: _formatSearchedUnit(bloodData),
                           ),
                           SizedBox(height: screenHeight * 0.02),

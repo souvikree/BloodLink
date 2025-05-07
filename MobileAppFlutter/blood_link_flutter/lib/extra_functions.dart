@@ -19,27 +19,40 @@ Map<String, int> countBloodGroupType(Map<String, dynamic>? bloodBankSent) {
 }
 
 int totalBloodBankUnit(Map<String, dynamic> bankData) {
-  final availableUnits = bankData['availableUnits'];
+  final availableUnits = bankData['availableUnits']; // using your field directly
   int totalUnits = 0;
 
   if (availableUnits != null && availableUnits is Map) {
-    availableUnits.forEach((key, value) {
-      if (value is int) {
-        totalUnits += value;
-      } else if (value is Map && value.containsKey('units')) {
-        // Safely convert units to int
-        final units = value['units'];
-        if (units is int) {
-          totalUnits += units;
-        } else if (units is double) {
-          totalUnits += units.toInt(); // convert double to int
+    // Count 'searched' units
+    final searched = availableUnits['searched'];
+    if (searched is Map && searched.containsKey('units')) {
+      final units = searched['units'];
+      if (units is int) {
+        totalUnits += units;
+      } else if (units is double) {
+        totalUnits += units.toInt();
+      }
+    }
+
+    // Count 'compatible' units (it's a list)
+    final compatible = availableUnits['compatible'];
+    if (compatible is List) {
+      for (var item in compatible) {
+        if (item is Map && item.containsKey('units')) {
+          final units = item['units'];
+          if (units is int) {
+            totalUnits += units;
+          } else if (units is double) {
+            totalUnits += units.toInt();
+          }
         }
       }
-    });
+    }
   }
 
   return totalUnits;
 }
+
 
 LatLng extractLatLng(Map<String, dynamic> locationData) {
   List coords = locationData['coordinates'];

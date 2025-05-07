@@ -1,4 +1,5 @@
 import 'package:blood_link_flutter/blood_bank_details.dart';
+import 'package:blood_link_flutter/order_details_page.dart';
 import 'package:blood_link_flutter/provider/add_blood_order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -649,12 +650,14 @@ class AddOrderScreen extends StatelessWidget {
                                         .withOpacity(0.3),
                                   ),
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    provider.prescriptionImage!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
+                                child: InkWell(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      provider.prescriptionImage!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                    ),
                                   ),
                                 ),
                               ),
