@@ -35,14 +35,36 @@ class BloodOrderProvider with ChangeNotifier {
   ];
 
   BloodOrderProvider(Map<String, dynamic>? initialBloodBank) {
-    if (initialBloodBank != null &&
-        initialBloodBank['availableUnits'] != null &&
-        initialBloodBank['availableUnits']['searched'] != null) {
+    if (initialBloodBank == null) return;
+
+    final availableUnits = initialBloodBank['availableUnits'] as Map<String, dynamic>?;
+
+    if (availableUnits == null) return;
+
+    final searched = availableUnits['searched'] as Map<String, dynamic>?;
+
+    final compatibleList = availableUnits['compatible'] as List<dynamic>?;
+
+    if (searched != null || (compatibleList != null && compatibleList.isNotEmpty)) {
       _selectedBloodBank = initialBloodBank;
-      _selectedBloodGroup = initialBloodBank['availableUnits']['searched']
-          ['bloodGroup'] as String?;
+
+      String? bloodGroup;
+
+      if (searched != null) {
+        bloodGroup = searched['bloodGroup'] as String?;
+      } else if (compatibleList != null && compatibleList.isNotEmpty) {
+        final firstCompatible = compatibleList.first;
+        if (firstCompatible is Map<String, dynamic>) {
+          bloodGroup = firstCompatible['bloodGroup'] as String?;
+        }
+      }
+
+      _selectedBloodGroup = bloodGroup;
     }
   }
+
+
+
 
   // Getters
   Map<String, dynamic>? get selectedBloodBank => _selectedBloodBank;
@@ -150,7 +172,7 @@ class BloodOrderProvider with ChangeNotifier {
   }
 
   Future<void> fetchCurrentAddress(BuildContext context) async {
-    _isCurrentLocationLoading=true;
+    _isCurrentLocationLoading = true;
     notifyListeners();
 
     try {
@@ -200,19 +222,19 @@ class BloodOrderProvider with ChangeNotifier {
 
         // Set address in provider
         addressController.text = address;
-        _isCurrentLocationLoading=false;
+        _isCurrentLocationLoading = false;
 
         // Optional: Save lat/lng if needed
         // provider.latitude = position.latitude;
         // provider.longitude = position.longitude;
       } else {
-        _isCurrentLocationLoading=false;
+        _isCurrentLocationLoading = false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Unable to fetch address.')),
         );
       }
     } catch (e) {
-      _isCurrentLocationLoading=false;
+      _isCurrentLocationLoading = false;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching address: $e')),
       );
